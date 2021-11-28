@@ -1,0 +1,86 @@
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block tilte %}首页{% endblock %}
+{% block css %}
+    <style>
+        img{
+            width: 100%;
+        }
+        .font-16{ font-size:16px !important;}
+        .font-32 {
+            font-size: 3.2rem;
+        }
+        .stable-security{
+            padding: 30px 30px 20px 30px;
+        }
+        .mt-50 { margin-top:50px !important;}
+        .running {
+            animation-play-state: running;
+        }
+        .nopad-xs {
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+        }
+        .color-gray{color:#8A97A9 !important}
+        .stable-div-padding {
+            padding: 30px 30px 20px 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <div class="row text-center">
+            <div class="col-md-12 home-mt">
+                <br><br><br>
+                <h2 class="font-32">轻量级Bug追踪管理平台</h2>
+            </div>
+            <div class="col-md-8 col-md-offset-2">
+                <p class="font-16 color-gray">简介、高效的 Bug 追踪、轻量、边界的项目管理，安全、稳定的数据保障、完<br>美地将 Bug 管理
+                与团队协作结合在一起。项目管理，本就是一种优雅的艺术</p>
+            </div>
+         <img src="{% static 'img/banner1.png' %}" alt="">
+        </div>
+        <section>
+            <div class="container stable-security">
+                <div class="row mt-50 text-center running">
+                   <div class="col-md-12"><h2 class="font-32 div-title weight-600 animation-y">安全保障，放心使用</h2></div>
+                   <div class="col-md-8 mt-20 col-md-offset-2 nopad-xs"><p class="font-16 color-gray mb-80 lh-15 animation-y delay-1">基于云平台的服务，我们更加重视产品的安全性能。每一份数据都做了严格的加密和多种场景的备份，高防危机发生。出现数据问题及时进行恢复，让数据在云端更加安全</p></div>
+                </div>
+                <br><br><br>
+                <div class="row flex-stretch-gt-sm running" style="margin-top:50px;">
+                    <div class="col-md-4 col-sm-4 nopad-xs">
+                        <div class="animation-y" style="height:100%;">
+                            <div class=" text-center box-shadow fit-plr stable-div-padding md-padding-div" style="height:100%;">
+                                <img src="{% static 'img/wendin.png' %}" class="img-responsiv col-center" style="width:100px;margin-top:-85px;">
+                                <h5 class="mb-15 font-18 weight-500" style="margin-top:30px">稳定</h5>
+                                <p class="lh-157 color-gray font-14" style="margin:18px 0 0 0;min-height:140px;">云盘数据可靠性不低于99.99%，自动宕机迁移，自动多线路备份，数据恢复安全方便&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 top90-xs nopad-xs">
+                        <div class="animation-y" style="height:100%;">
+                            <div class="text-center box-shadow fit-plr stable-div-padding md-padding-div" style="height:100%;">
+                                 <img src="{% static 'img/anquan.png' %}" class="img-responsiv col-center" style="width:100px;margin-top:-85px;">
+                                <h5 class="mb-15 font-18 weight-500" style="margin-top:30px">安全</h5>
+                                <p class="lh-157 color-gray font-14" style="margin:18px 0 0 0;min-height:140px;">数据传输和存储都进行了严格的加密。高防服务器，Web防火墙、防暴力破解技术确保数据安全</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 top90-xs nopad-xs">
+                        <div class="animation-y" style="height:100%;">
+                            <div class="text-center box-shadow fit-plr stable-div-padding md-padding-div" style="height:100%;">
+                                <img src="{% static 'img/baozhang.png' %}" class="img-responsiv col-center" style="width:100px;margin-top:-85px;">
+                                <h5 class="mb-15 font-18 weight-500" style="margin-top:30px">保障</h5>
+                                <p class="lh-157 color-gray font-14" style="margin:18px 0 0 0;min-height:140px;">数据永久保存不丢失，可持续为业务发展提供完整的存储、安全解决方案，出现问题及时恢复</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <img src="{% static 'img/banner2.png' %}" alt="">
+        <br><br>
+    </div>
+{% endblock %}

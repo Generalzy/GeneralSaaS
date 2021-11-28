@@ -1,0 +1,187 @@
+{% extends 'bases/manage.html' %}
+
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+    <style>
+        .panel-default .panel-heading{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+        }
+        .content{
+            border-left: 1px solid #dddddd;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+        .title-list ul{
+            padding-left: 15px;
+        }
+        .title-list ul a{
+            display: block;
+            padding: 5px 0;
+        }
+        div.sweet-alert h2{
+            padding-top: 15px;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content%}
+    <div class="container-fluid">
+        <div class="panel panel-default">
+          <!-- Default panel contents -->
+          <div class="panel-heading">
+          <div>
+                  <a href="{% url 'file' pk=request.project.id %}">
+                        <span class="glyphicon glyphicon-home" aria-hidden="true" style="color: #5bc0de;margin-left: 1px">
+                          文件库
+                        </span>
+                  </a>
+              {% for item in paths %}
+                  <a href="{% url 'file' pk=request.project.id %}?folder={{ item.id }}">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true" style="color: #5bc0de">{{ item.name }}</span>
+                  </a>
+
+              {% endfor %}
+          </div>
+                 <div>
+                     <div class="btn btn-success btn-xs">
+                     <span class="glyphicon glyphicon-plus-sign" aria-hidden="true" data-toggle="modal" data-target="#addModal"> 新建文件夹</span>
+                    </div>
+                 </div>
+          </div>
+          <!-- Table -->
+          <table class="table table-hover" style="margin-left: 5px" id="table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>文件大小</th>
+                    <th>更新者</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in files %}
+              <tr id="{{ file.id }}">
+                <th scope="row">
+                    {% if file.file_type == 1 %}
+                        <a href="{% url 'file' pk=request.project.id %}?folder={{ file.id }}">
+                        <span class="glyphicon glyphicon-file" aria-hidden="true">　{{ file.name }}</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'file' pk=request.project.id %}?folder={{ file.id }}">
+                        <span class="glyphicon glyphicon-folder-open" aria-hidden="true">　{{ file.name }}</span>
+                        </a>
+                    {% endif %}
+                </th>
+                <td>{% if file.file_type == 1 %}{{ file.size }}{% else %}<span>-----------</span>{% endif %}</td>
+                <td>{{ file.update_user.username }}</td>
+                <td>{{ file.update_datetime }}</td>
+                <td>
+                    <div>
+                       <span fid="{{ file.id }}" class="glyphicon glyphicon-trash delete" aria-hidden="true" style="color: red" data-toggle="modal" data-target="#alertModal"></span>
+                    </div>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+    <!-- Modal -->
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">新建文件夹</h4>
+              </div>
+              <div class="modal-body">
+                  <form id="fileForm">
+                    {% csrf_token %}
+                      {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.auto_id }}">
+                                {{ field.name }}
+                            </label>
+                        {{ field }}
+                        <span style="color: red">{{ field.errors.0 }}</span>
+                        </div>
+                    {% endfor %}
+                  </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="create">创建</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/sweetalert.min.js' %}"></script>
+    <script>
+        $('#create').click(function (){
+            $.ajax({
+                url:location.href,
+                type:'post',
+                data:$('#fileForm').serialize(),
+                dataType:'json',
+                success:function (res){
+                    if(res.code)
+                    {
+                        location.reload()
+                    }
+                    else{
+                          $.each(res.errors,function (index,obj)
+                                    {
+                                        let targetId='#id_'+index;$(targetId).next().text(obj[0]).parent().addClass('has-error')
+                                    }
+                                )
+                    }
+                }
+            })
+        })
+
+        $('input').click(function (){
+            $(this).next().text('').parent().removeClass('has-error')
+        })
+
+        $('.delete').click(function (){
+             let fid=$(this).attr('fid')
+            swal({
+                  title: "",
+                  text: "删除后将无法找回！",
+                  type: "warning",
+                  showCancelButton: true,
+                  confirmButtonClass: "btn-danger",
+                  confirmButtonText: "确定",
+                  cancelButtonText: "取消",
+                  closeOnConfirm: false,
+                  closeOnCancel: false
+                },
+                function(isConfirm) {
+                  if (isConfirm) {
+                      $.ajax({
+                          url:'{% url 'fileDelete' pk=request.project.id %}',
+                          type:'get',
+                          data:{'fid':fid},
+                          success:function (res){
+                              if(res.code){
+                                  $('#'+fid).remove()
+                                  swal("删除成功！", "", "success");
+                              }
+                          }
+                      })
+                  } else {
+                    swal("已取消！", "", "error");
+                  }
+                });
+        })
+    </script>
+{% endblock %}

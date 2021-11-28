@@ -1,0 +1,16 @@
+<ul class="nav navbar-nav">
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle active" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">项　目{% if request.project %} ( {{ request.project.name }} ){% endif %}<span class="caret"></span></a>
+  <ul class="dropdown-menu">
+      <li><a href="#"><span class="glyphicon glyphicon-list" aria-hidden="true">　我创建的项目</span></a></li>
+      {% for project in mine_projects %}
+          <li><a href="{% url 'dashboard' pk=project.id %}">{{ project.name }}</a></li>
+      {% endfor %}
+    <li role="separator" class="divider"></li>
+      <li><a href="#"><span class="glyphicon glyphicon-random" aria-hidden="true">　我参与的项目</span></a></li>
+  {% for uproject in join_user_projects %}
+      <li><a href="{% url 'dashboard' pk=uproject.project.id %}">{{ uproject.project.name }}</a></li>
+  {% endfor %}
+  </ul>
+</li>
+</ul>

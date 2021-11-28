@@ -1,0 +1,23 @@
+# pycharm
+.idea/
+GeneralSaaS/settings.py
+
+# __pycache__/
+*.py[cod]
+*$py.class
+
+
+# django stuff
+local_settings.py
+*.sqlit3
+
+
+# database
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# tencent
+*/tencent
+
+
+

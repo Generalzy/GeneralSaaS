@@ -1,0 +1,216 @@
+{% extends 'bases/manage.html' %}
+
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+    <style>
+    .project{
+        margin-top: 10px;
+    }
+    .panel-body{
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .panel-body>.item:hover{
+        border: 1px solid #f0ad4e;
+    }
+    .panel-body>.item{
+        border-radius: 6px;
+        width: 228px;
+        border: 1px solid #dddddd;
+        margin:20px 10px;
+    }
+    .panel-body>.item>.title{
+        height: 104px;
+        color: white;
+        display: flex;
+        justify-content:center;
+        align-items: center;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        font-size: 15px;
+        text-decoration: none;
+    }
+    .panel-body>.item>.info{
+        padding: 10px 10px;
+        display: flex;
+        justify-content: space-between;
+        border-top-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+        color: #8c8c8c;
+    }
+    .panel-body>.item>.info a{
+        text-decoration: none;
+    }
+    .color-radio label{
+        margin-left: 0;
+        padding-left: 0;
+    }
+    .color-radio input[type='radio']{
+        opacity: 0;
+        display: none;
+    }
+    .color-radio input[type='radio'] + .cycle{
+        display: inline-block;
+        height: 25px;
+        width: 25px;
+        border-radius: 50%;
+        border: 2px solid #dddddd;
+    }
+    .color-radio input[type='radio']:checked + .cycle{
+        border: 2px solid black;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+<div>
+    <div class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true" data-toggle="modal" data-target="#addModal"> 新建项目</span>
+    </div>
+</div>
+<!-- Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">新建项目</h4>
+          </div>
+          <div class="modal-body">
+            <form id="addForm">
+                {% csrf_token %}
+                {% for field in form %}
+                  <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                  <span style="color: red">{{ field.errors }}</span>
+                  </div>
+                {% endfor %}
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-submit">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="project">
+    <div class="panel panel-default">
+          <div class="panel-heading"><span class="glyphicon glyphicon-star-empty" aria-hidden="true">　星标项目</span></div>
+          <div class="panel-body">
+            {% for project in project_dic.star %}
+                <div class="item">
+                    <a href="{% url 'dashboard' pk=project.obj.id %}" class="title" style="background-color: {{ project.obj.get_color_display }}">{{ project.obj.name }}</a>
+                    <div class="info">
+                        <div>
+                            <a href="{% url 'project_unstar' ptype=project.ptype pk=project.obj.id %}">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true" style="font-size: 18px;color: #f0ad4e"></span>
+                            </a>
+                            <span>{{ project.obj.creator.username }}</span>
+                        </div>
+                        <div>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span>{{ project.obj.join_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-list" aria-hidden="true">　我创建的项目</span></div>
+              <div class="panel-body">
+                {% for project in project_dic.mine %}
+                <div class="item">
+                    <a href="{% url 'dashboard' pk=project.obj.id %}" class="title" style="background-color: {{ project.obj.get_color_display }}">{{ project.obj.name }}</a>
+                    <div class="info">
+                        <div>
+                            <a href="{% url 'project_star' ptype=project.ptype pk=project.obj.id %}">
+                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true" style="font-size: 18px"></span>
+                            </a>
+                            <span>{{ project.obj.creator.username }}</span>
+                        </div>
+                        <div>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span>{{ project.obj.join_count }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><span class="glyphicon glyphicon-random" aria-hidden="true">　我参与的项目</span></div>
+              <div class="panel-body">
+                {% for project in project_dic.join %}
+                <div class="item">
+                    <a href="{% url 'dashboard' pk=project.obj.id %}" class="title" style="background-color: {{ project.obj.get_color_display }}">{{ project.obj.name }}</a>
+                    <div class="info">
+                        <div>
+                            <a href="{% url 'project_star' ptype=project.ptype pk=project.obj.id %}">
+                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true" style="font-size: 18px"></span>
+                            </a>
+                            <span>{{ project.obj.creator.username }}</span>
+                        </div>
+                        <div>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span>{{ project.obj.join_count }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+</div>
+
+
+</div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/sweetalert.min.js' %}"></script>
+    <script>
+        let $btnSubmit=$('#btn-submit')
+        $btnSubmit.click(function (){
+
+            swal({
+              title: "是否创建此项目？",
+                text:'项目创建无法更改或删除！',
+              type: "info",
+              showCancelButton: true,
+              closeOnConfirm: false,
+              showLoaderOnConfirm: true
+            }, function () {
+              $.ajax({
+                url:'',
+                type:'post',
+                data:$('#addForm').serialize(),
+                dataType:'json',
+                success:function (res){
+                    if (!res.code)
+                    {
+                       $.each(res.errors,function (index,obj)
+                        {
+                            let targetId='#id_'+index;
+                            $(targetId).next().text(obj[0]).parent().addClass('has-error')
+                        })
+                    }
+                    else
+                    {
+                        location.reload();
+                    }
+                }
+            })
+            });
+        })
+
+    </script>
+{% endblock %}

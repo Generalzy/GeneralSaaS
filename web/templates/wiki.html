@@ -1,0 +1,130 @@
+{% extends 'bases/manage.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'editor.md-master/css/editormd.preview.min.css' %}">
+    <style>
+        .title-list{
+            border-right: 1px solid #dddddd;
+            min-height: 500px;
+        }
+        .panel-default .panel-heading{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .content{
+            border-left: 1px solid #dddddd;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+        .title-list ul{
+            padding-left: 15px;
+        }
+        .title-list ul a{
+            display: block;
+            padding: 5px 0;
+        }
+    </style>
+{% endblock %}
+
+{% block content%}
+    <div class="container-fluid">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+              <div>
+               <span class="glyphicon glyphicon-book" aria-hidden="true" style="color: #1b6d85">　wiki文档</span>
+              </div>
+                <div class="function">
+                  <a href="{% url 'wikiAdd' pk=request.project.id %}" class="btn btn-success btn-xs ">
+                      <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"> 新建文章</span>
+                  </a>
+                  {% if wiki_data %}
+                    <a href="{% url 'wikiDelete' pk=request.project.id wiki_pk=wiki_data.id %}" class="btn btn-danger btn-xs">
+                                          <span class="glyphicon glyphicon-trash" aria-hidden="true"> 删除文章</span>
+                     </a>
+                      <a href="{% url 'wikiEdit' pk=request.project.id wiki_pk=wiki_data.id %}" class="btn btn-primary btn-xs">
+                                          <span class="glyphicon glyphicon-pencil" aria-hidden="true"> 编辑文章</span>
+                     </a>
+                    {% endif %}
+
+              </div>
+          </div>
+          <div class="panel-body">
+            <div class="col-md-3 title-list">
+                <ul id="catalog">
+                </ul>
+            </div>
+              <div class="col-md-9 content">
+                    {% if wiki_data %}
+                        <h3>{{ wiki_data.title }}</h3>
+                        <hr>
+                        <div id="editormd-view">
+                            <textarea name="" id="" cols="30" rows="10">{{ wiki_data.content }}</textarea>
+                        </div>
+                    {% else %}
+                    <div class="text-center" style="margin-top: 100px">
+                        <h4>《{{ request.project.name }}》wiki文档库</h4>
+                        <a href="{% url 'wikiAdd' pk=request.project.id %}"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"> 新建文章</span></a>
+                    </div>
+                    {% endif %}
+              </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script src='{% static 'editor.md-master/editormd.min.js' %}'></script>
+    <script src="{% static 'editor.md-master/lib/flowchart.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/jquery.flowchart.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/marked.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/prettify.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/raphael.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/sequence-diagram.min.js' %}"></script>
+    <script src="{% static 'editor.md-master/lib/underscore.min.js' %}"></script>
+    <script>
+        let wiki_detail='{% url 'wiki' pk=request.project.id %}'
+
+        $(function (){
+            initmdeditor();
+            initcatalog();
+
+        });
+        function initmdeditor(){
+            editormd.markdownToHTML("editormd-view",{
+                htmlDecode:'script,style,iframe',
+                emoji           : true,
+                taskList        : true,
+                tex             : true,  // 默认不解析
+                flowChart       : true,  // 默认不解析
+                sequenceDiagram : true,  // 默认不解析
+                syncScrolling : "single",
+                path:'{% static 'editor.md-master/lib/' %}',
+            })
+        }
+
+        function  initcatalog(){
+            $.ajax({
+                url:'{% url 'wikiCatalogs' pk=request.project.id %}',
+                type:'get',
+                dataType:'json',
+                success:function (res){
+                    let $catalog=$('#catalog')
+                    $.each(res.info,function (index,item){
+                        {# index:0 [1, 'bbs概要'     ,null]#}
+                        {# index:1 [3, 'bbs业务流程图',1]#}
+                        let href=wiki_detail+'?wiki_id='+item[0];
+                        let li=$('<li>').attr('id','id_'+item[0]).append($('<a>').text(item[1]).attr('href',href)).append($('<ul>'))
+                        if(!item[2]){
+                            $catalog.append(li)
+                        }else{
+                            let fid=$('#id_'+item[2])
+                            $(fid).children('ul').append(li)
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+{% endblock %}

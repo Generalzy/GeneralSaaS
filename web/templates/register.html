@@ -1,0 +1,76 @@
+{% extends 'bases/base.html' %}
+
+{% block tilte %}用户注册{% endblock %}
+
+{% block content %}
+<div class="account">
+    <h1 class="text-center h1">注册</h1>
+    <div>
+        <form id="registerForm" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            {% if field.name == 'code' %}
+                <div class="form-group">
+                    <label for={{ field.auto_id }}>{{ field.label }}</label>
+                    <div class="clearfix">
+                        <div class="col-md-6" style="padding-left: 0">{{ field }}</div>
+                        <div class="col-md-6" style="padding-right: 0"><div id="code"  class="btn btn-default" style="width: 150px">点击获取验证码</div></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for={{ field.auto_id }}>{{ field.label }}</label>
+                    {{ field }}
+                    <span style="color:red;position: absolute" class="pull-right">{{ field.errors }}</span>
+                </div>
+            {% endif %}
+        {% endfor %}
+        </form>
+        <div class="btn btn-primary" style="width: 150px" id="submit">注册</div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        let time=60;
+        let $codeBtn=$('#code');
+        let $phoneEle=$('#id_phone');
+        let $submitBtn=$('#submit');
+        let $registerForm=$('#registerForm');
+        $codeBtn.click(function (e)
+            {
+                e.preventDefault();
+                e.stopPropagation();
+            let $phoneNumber=$phoneEle.val();
+            $codeBtn.prop('disabled',true)
+            let remind=setInterval(function (){
+                                $codeBtn.text(time+'秒重新发送')
+                                time=time-1;
+                                if (time < 1)
+                                {
+                                    clearInterval(remind)
+                                    $codeBtn.text('点击获取验证码').prop('disabled',false)
+                                }
+                            },1000)
+                            $.ajax({url:'/sms/', type:'post', data: {'phone': $phoneNumber, 'csrfmiddlewaretoken':'{{csrf_token}}','method':'register'}, success: function (response) {if(! response.code) {if (response.msg.phone) {alert(response.msg.phone)} else {alert(response.msg)}$phoneEle.val('')}}})})
+
+        $submitBtn.click(function (e){
+            e.preventDefault()
+            e.stopPropagation()
+            $.ajax({
+                url:'/register/',
+                type: 'post',
+                data: $registerForm.serialize(),
+                success:function (res){
+                    if(res.code===1)
+                    {location.href=res.url;}
+                    else
+                    {$.each(res.errors,function (index,obj)
+                        {let targetId='#id_'+index;$(targetId).next().text(obj[0]).parent().addClass('has-error')})}}})})
+        $('input').click(function (){
+            $(this).next().text('').parent().removeClass('has-error')
+        })
+    </script>
+{% endblock %}
