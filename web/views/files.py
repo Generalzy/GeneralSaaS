@@ -1,19 +1,18 @@
 from django.http import JsonResponse
 from utils.response import ApiResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from web.forms import FileModelForm
-from django.urls import reverse
 from web import models
-from django.views.decorators.csrf import csrf_exempt
-from libs.tencent.cos import upload_file
-from utils.secret import get_key
+from libs.tencent.cos import delete_file, delete_files
 
 
-# url: http://127.0.0.1:8000/manage/file/1/?folder=9
+# url: http://127.0.0.1:8000/manage/6/file/?folder=8
+# url: http://127.0.0.1:8000/manage/project(id)/file/?folder=folder(id)
 def file(request, pk):
     res = ApiResponse()
     folder = request.GET.get('folder', None)  # type:str
     if folder and folder.isdigit():
+        # 只有文件夹可以点进去
         parent = models.File.objects.filter(pk=folder, project=request.project, file_type=2).first()
     else:
         parent = None
@@ -51,6 +50,38 @@ def file(request, pk):
 
 def file_delete(request, pk):
     fid = request.GET.get('fid')
-    models.File.objects.filter(project_id=pk, pk=fid).delete()
+    bucket = request.project.bucket
+    file_obj = models.File.objects.filter(project_id=pk, pk=fid).first()
+    if file_obj.file_type == 1:
+        # 删除文件
+        # 删除后还要归还size
+        request.project.use_space -= file_obj.size
+        request.project.save()
+        # 去cos中删除文件
+        data = delete_file(bucket=bucket, key=file_obj.key)
+        print(data)
+    else:
+        # 删除文件夹
+        # 要递归删除所有文件并归还所有size
+        folder_list = [file_obj, ]
+        total_size = 0
+        key_list = []
+        for folder in folder_list:
+            child_list = models.File.objects.filter(parent=folder, project_id=pk).order_by('-file_type')
+            for child in child_list:
+                if child.file_type == 2:
+                    folder_list.append(child)
+                else:
+                    total_size += child.size
+                    key_list.append({'Key': child.key})
+
+        if total_size:
+            request.project.use_space -= total_size
+            request.project.save()
+        if key_list:
+            data = delete_files(bucket=bucket, keys=key_list)
+            print(data)
+
+    file_obj.delete()
     res = ApiResponse()
     return JsonResponse(res.data)

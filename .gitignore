@@ -17,7 +17,6 @@ local_settings.py
 !*/migrations/__init__.py
 
 # tencent
-*/tencent
-
+*/tencent/conf.py
 
 
