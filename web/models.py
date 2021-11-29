@@ -24,8 +24,8 @@ class PricePolicy(models.Model):
     # 正整数类型
     project_num = models.PositiveIntegerField(verbose_name='项目数')
     project_member = models.PositiveIntegerField(verbose_name='项目成员数')
-    project_space = models.PositiveIntegerField(verbose_name='单项目空间(M)')
-    per_file_size = models.PositiveIntegerField(verbose_name='单文件大小', null=True)
+    project_space = models.PositiveIntegerField(verbose_name='项目空间(G)')
+    per_file_size = models.PositiveIntegerField(verbose_name='单文件大小(M)', null=True)
 
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
@@ -61,7 +61,7 @@ class Project(models.Model):
     name = models.CharField(verbose_name='项目名', max_length=32)
     color = models.SmallIntegerField(verbose_name='项目颜色', choices=color_choice, default=1)
     desc = models.CharField(verbose_name='项目描述', max_length=255, null=True, blank=True)
-    use_space = models.IntegerField(verbose_name='项目已使用空间', default=0)
+    use_space = models.IntegerField(verbose_name='项目已使用空间(G)', default=0)
     star = models.BooleanField(verbose_name='星标', default=False)
 
     join_count = models.SmallIntegerField(verbose_name='参与人数', default=1)
@@ -82,7 +82,7 @@ class ProjectUser(models.Model):
 class Wiki(models.Model):
     title = models.CharField(verbose_name='标题', max_length=32)
     content = models.TextField(verbose_name='内容')
-    project = models.ForeignKey(verbose_name='项目', to='Project', on_delete=models.DO_NOTHING)
+    project = models.ForeignKey(verbose_name='项目', to='Project', on_delete=models.CASCADE)
     depth = models.SmallIntegerField(verbose_name='深度', default=1)
     parent = models.ForeignKey(verbose_name='父文章', to='Wiki', null=True, blank=True, on_delete=models.CASCADE,
                                related_name='children')

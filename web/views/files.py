@@ -3,7 +3,9 @@ from utils.response import ApiResponse
 from django.shortcuts import render
 from web.forms import FileModelForm
 from web import models
-from libs.tencent.cos import delete_file, delete_files
+from libs.tencent.cos import delete_file, delete_files, credentials
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 # url: http://127.0.0.1:8000/manage/6/file/?folder=8
@@ -85,3 +87,30 @@ def file_delete(request, pk):
     file_obj.delete()
     res = ApiResponse()
     return JsonResponse(res.data)
+
+
+@csrf_exempt
+def file_credentials(request, pk):
+    # request我放进去了price,user,project
+    res = ApiResponse()
+    if request.method == 'POST':
+        single_size = request.price.per_file_size * 1024 * 1024  # 转为字节
+        space = request.price.project_space * 1024 * 1024 * 1024  # 转为字节
+        total_size = 0  # 字节
+
+        checkFiles = json.loads(request.body)
+        for item in checkFiles:
+            if item.get('size') > single_size:
+                res.code = 0
+                res.msg = f'{item.get("name")}超出限制(最大{single_size}Mb),请升级套餐'
+                return JsonResponse(res.data)
+            else:
+                total_size += item.get('size')
+        use_space = request.project.use_space * 1024 * 1024 * 1024  # 转为字节
+        if use_space + total_size > space:
+            res.code = 0
+            res.msg = '项目容量超额，请升级套餐'
+            return JsonResponse(res.data)
+        data = credentials(bucket=request.project.bucket)
+        res.tmp = data
+        return JsonResponse(res.data)

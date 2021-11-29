@@ -24,6 +24,19 @@
         div.sweet-alert h2{
             padding-top: 15px;
         }
+        .panel-default .panel-heading .function .upload{
+            overflow: hidden;
+        }
+        .panel-default .panel-heading .function .upload input{
+            opacity: 0;
+            position: absolute;
+            overflow: hidden;
+            top:90px;
+            bottom: 0;
+            width: 76px;
+            height: 20px;
+        }
+
     </style>
 
 {% endblock %}
@@ -39,16 +52,21 @@
                           文件库
                         </span>
                   </a>
-              {% for item in paths %}
-                  <a href="{% url 'file' pk=request.project.id %}?folder={{ item.id }}">
-                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true" style="color: #5bc0de">{{ item.name }}</span>
-                  </a>
-
-              {% endfor %}
+                  {% for item in paths %}
+                      <a href="{% url 'file' pk=request.project.id %}?folder={{ item.id }}">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true" style="color: #5bc0de">{{ item.name }}</span>
+                      </a>
+                  {% endfor %}
           </div>
-                 <div>
+                 <div class="function">
+                     <div class="btn-xs btn btn-primary upload">
+                            <div>
+                               <span class="glyphicon glyphicon-level-up" aria-hidden="true">　上传文件</span>
+                            </div>
+                            <input type="file" multiple class="btn" id="files">
+                     </div>
                      <div class="btn btn-success btn-xs">
-                     <span class="glyphicon glyphicon-plus-sign" aria-hidden="true" data-toggle="modal" data-target="#addModal"> 新建文件夹</span>
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true" data-toggle="modal" data-target="#addModal"> 新建文件夹</span>
                     </div>
                  </div>
           </div>
@@ -124,8 +142,61 @@
 {% endblock %}
 
 {% block js %}
+    {% load static %}
     <script src="{% static 'js/sweetalert.min.js' %}"></script>
+    <script src="{% static 'js/cos-v5.js' %}"></script>
     <script>
+        $('#files').change(function (){
+            let file_list=$(this)[0].files
+            let checkFiles=[]
+            $.each(file_list,function (index,file_obj){
+                checkFiles.push({'name':file_obj.name,'size':file_obj.size})
+            })
+
+            let cos = new COS({
+                // getAuthorization 必选参数
+                getAuthorization: function (options, callback) {
+                    // 异步获取临时密钥
+                    $.post('{% url 'credentials' pk=request.project.id %}',
+                        JSON.stringify(checkFiles),
+                            function (res) {
+                                if (res.code)
+                                {
+                                    let data=res.tmp
+                                    let credentials=data.credentials
+                                    callback({
+                                      TmpSecretId: credentials.tmpSecretId,
+                                      TmpSecretKey: credentials.tmpSecretKey,
+                                      SecurityToken: credentials.sessionToken,
+                                      StartTime: data.startTime,
+                                      ExpiredTime: data.expiredTime,
+                                  })
+                                }
+                                else
+                                {
+                                    alert(res.msg)
+                                }
+                            })
+                        }
+                    });
+                    $.each(file_list,function (index,file_obj){
+                         cos.putObject({
+                            Bucket: '{{ request.project.bucket }}',
+                            Region: 'ap-nanjing',
+                            Key: file_obj.name,
+                            StorageClass: 'STANDARD',
+                            Body: file_obj, // 上传文件对象
+                            onProgress: function(progressData) {
+                                // 进度
+                                console.log(JSON.stringify(progressData));
+                            }
+                        }, function(err, data) {
+                            // 返回值
+                            console.log(err || data);
+                        });
+                    })
+                })
+
         $('#create').click(function (){
             $.ajax({
                 url:location.href,
@@ -183,5 +254,7 @@
                   }
                 });
         })
+
+
     </script>
 {% endblock %}

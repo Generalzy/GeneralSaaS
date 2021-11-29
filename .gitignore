@@ -10,7 +10,7 @@ GeneralSaaS/settings.py
 # django stuff
 local_settings.py
 *.sqlit3
-
+script
 
 # database
 */migrations/*.py
