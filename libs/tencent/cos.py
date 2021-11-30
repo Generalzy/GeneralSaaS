@@ -77,3 +77,7 @@ def credentials(bucket):
     sts = Sts(credentials_config)
     response = sts.get_credential()
     return dict(response)
+
+
+def auth(bucket, key):
+    return client.head_object(Bucket=bucket, Key=key)

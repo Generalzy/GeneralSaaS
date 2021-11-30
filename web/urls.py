@@ -38,6 +38,9 @@ urlpatterns = [
     url(r'^manage/(?P<pk>\d+)/file/', files.file, name='file'),
     url(r'^manage/(?P<pk>\d+)/fileDelete/', files.file_delete, name='fileDelete'),
     url(r'^manage/(?P<pk>\d+)/credentials/', files.file_credentials, name='credentials'),
+    url(r'^manage/(?P<pk>\d+)/filePost/',files.file_post,name='filePost'),
+
+
     url(r'^manage/(?P<pk>\d+)/settings/', manage.settings, name='settings'),
 
     # wiki

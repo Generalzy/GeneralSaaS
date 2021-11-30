@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django.conf import settings
 from utils.secret import get_secret
 from utils.colorwidgets.widget import ColorRadioSelect
+from libs.tencent.cos import auth
 
 
 class BootStrapForm:
@@ -211,3 +212,35 @@ class FileModelForm(BootStrapForm, forms.ModelForm):
         if exists:
             raise ValidationError('文件夹已存在')
         return name
+
+
+class FileForm(forms.ModelForm):
+    etag = forms.CharField(label='ETag')
+
+    class Meta:
+        model = models.File
+        exclude = ('project', 'file_type', 'update_user', 'update_datetime')
+
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
+
+    def clean_path(self):
+        return f'https://{self.cleaned_data.get("path")}'
+
+    def clean(self):
+        key = self.cleaned_data.get('key')
+        etag = self.cleaned_data.get('etag')
+        # 向cos校验
+        if not key or not etag:
+            raise ValidationError("异常数据")
+
+        else:
+            try:
+                res = auth(bucket=self.request.project.bucket, key=key)
+            except Exception as e:
+                raise ValidationError('资源不存在')
+            size = self.cleaned_data.get('size')
+            if etag != res.get('ETag') or size != int(res.get('Content-Length')):
+                raise ValidationError('etag或size错误')
+            return self.cleaned_data

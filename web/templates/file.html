@@ -36,7 +36,12 @@
             width: 76px;
             height: 20px;
         }
-
+        .upload-progress{
+            position: fixed;
+            right: 4px;
+            bottom: 2px;
+            width: 400px;
+        }
     </style>
 
 {% endblock %}
@@ -81,14 +86,12 @@
                     <th>操作</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="showTbody">
             {% for file in files %}
               <tr id="{{ file.id }}">
                 <th scope="row">
                     {% if file.file_type == 1 %}
-                        <a href="{% url 'file' pk=request.project.id %}?folder={{ file.id }}">
                         <span class="glyphicon glyphicon-file" aria-hidden="true">　{{ file.name }}</span>
-                        </a>
                     {% else %}
                         <a href="{% url 'file' pk=request.project.id %}?folder={{ file.id }}">
                         <span class="glyphicon glyphicon-folder-open" aria-hidden="true">　{{ file.name }}</span>
@@ -109,6 +112,18 @@
           </table>
         </div>
 
+    <div id="uploadProgress" class="upload-progress hide">
+        <div class="panel panel-info">
+          <div class="panel-heading"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"> 上 传 进 度</span> <button id='go' class="btn btn-xs pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></div>
+          <div class="panel-body">
+            <table class="table" style="margin-bottom: 0">
+                <tbody id="progressList">
+
+                </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
     <!-- Modal -->
         <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
@@ -138,6 +153,22 @@
             </div>
           </div>
         </div>
+        </div>
+
+    <div class="hidden">
+        <table id="templates">
+            <tr>
+                <td>
+                    <div class="name"></div>
+                    <div class="progress" style="margin-bottom: 0">
+                      <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                        0%
+                      </div>
+                    </div>
+                    <div class="error" style="color: red"></div>
+                </td>
+            </tr>
+        </table>
     </div>
 {% endblock %}
 
@@ -152,7 +183,8 @@
             $.each(file_list,function (index,file_obj){
                 checkFiles.push({'name':file_obj.name,'size':file_obj.size})
             })
-
+            let $tbody=$('#progressList');
+            $tbody.empty()
             let cos = new COS({
                 // getAuthorization 必选参数
                 getAuthorization: function (options, callback) {
@@ -171,6 +203,7 @@
                                       StartTime: data.startTime,
                                       ExpiredTime: data.expiredTime,
                                   })
+                                    $('#uploadProgress').removeClass('hide')
                                 }
                                 else
                                 {
@@ -179,23 +212,74 @@
                             })
                         }
                     });
+
                     $.each(file_list,function (index,file_obj){
+
+                        var $tr=$('#templates').find('tr').clone()
+                        $tr.find('.name').text(file_obj.name)
+                        $tbody.append($tr);
+                        let key={{ request.project.id }}+'_'+(new Date()).getTime()+'_'+file_obj.name
                          cos.putObject({
                             Bucket: '{{ request.project.bucket }}',
                             Region: 'ap-nanjing',
-                            Key: file_obj.name,
+                            Key: key,
                             StorageClass: 'STANDARD',
                             Body: file_obj, // 上传文件对象
                             onProgress: function(progressData) {
                                 // 进度
-                                console.log(JSON.stringify(progressData));
+                                let percent=progressData.percent*100+'%'
+                                $tr.find('.progress-bar').text(percent)
+                                $tr.find('.progress-bar').css('width',percent)
                             }
                         }, function(err, data) {
                             // 返回值
-                            console.log(err || data);
+                            if (data && data.statusCode === 200)
+                            {
+                                $.ajax({
+                                    url:'{% url 'filePost' pk=request.project.id %}',
+                                    type:'post',
+                                    data:JSON.stringify({
+                                        'name':file_obj.name,
+                                        'size':file_obj.size,
+                                        'key':key,
+                                        'path':data.Location,
+                                        'parent':'{{ parent.id }}',
+                                        'etag':data.ETag
+                                    }),
+                                    success:function (res){
+                                        if (res.code)
+                                        {
+                                          let tm=`
+                                            <tr id="${res.id}">
+                                                <th scope="row">
+                                                        <span class="glyphicon glyphicon-file" aria-hidden="true">　${res.name}</span>
+                                                </th>
+                                                <td>${res.size}</td>
+                                                <td>${res.username}</td>
+                                                <td>${res.updatedatetime}</td>
+                                                <td>
+                                                    <div>
+                                                       <span fid="${res.id}" class="glyphicon glyphicon-trash delete" aria-hidden="true" style="color: red" data-toggle="modal" data-target="#alertModal"></span>
+                                                    </div>
+                                                </td>
+                                              </tr>
+                                        `
+                                        $('#showTbody').append(tm)
+                                        }
+                                    }
+                                })
+                            }
+                            else
+                            {
+                                $tr.find('error').text('上传失败')
+                            }
                         });
                     })
                 })
+
+        $('#go').click(function (){
+            $('#uploadProgress').addClass('hide')
+        })
 
         $('#create').click(function (){
             $.ajax({

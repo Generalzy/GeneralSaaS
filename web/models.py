@@ -101,7 +101,7 @@ class File(models.Model):
     name = models.CharField(verbose_name='名称', max_length=32)
     key = models.CharField(verbose_name='文件存储在cos中的key', max_length=128, null=True, blank=True)
     size = models.IntegerField(verbose_name='文件大小', null=True, blank=True)
-
+    path=models.CharField(verbose_name='文件路径',max_length=255,null=True,blank=True)
     parent = models.ForeignKey(verbose_name='父目录', on_delete=models.CASCADE, to='File', blank=True, null=True,
                                related_name='child')
     update_user = models.ForeignKey(verbose_name='更新者', to='UserInfo', on_delete=models.DO_NOTHING)

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from utils.response import ApiResponse
 from django.shortcuts import render
-from web.forms import FileModelForm
+from web.forms import FileModelForm, FileForm
 from web import models
 from libs.tencent.cos import delete_file, delete_files, credentials
 from django.views.decorators.csrf import csrf_exempt
@@ -32,7 +32,7 @@ def file(request, pk):
             files = query_sets.filter(parent=parent).order_by('-file_type')
         else:
             files = query_sets.filter(parent__isnull=True).order_by('-file_type')
-        return render(request, 'file.html', {'form': form, 'files': files, 'paths': paths})
+        return render(request, 'file.html', {'form': form, 'files': files, 'paths': paths, 'parent': parent})
 
     elif request.method == 'POST':
         form = FileModelForm(request=request, parent=parent, data=request.POST)
@@ -61,7 +61,6 @@ def file_delete(request, pk):
         request.project.save()
         # 去cos中删除文件
         data = delete_file(bucket=bucket, key=file_obj.key)
-        print(data)
     else:
         # 删除文件夹
         # 要递归删除所有文件并归还所有size
@@ -82,7 +81,6 @@ def file_delete(request, pk):
             request.project.save()
         if key_list:
             data = delete_files(bucket=bucket, keys=key_list)
-            print(data)
 
     file_obj.delete()
     res = ApiResponse()
@@ -113,4 +111,30 @@ def file_credentials(request, pk):
             return JsonResponse(res.data)
         data = credentials(bucket=request.project.bucket)
         res.tmp = data
+        return JsonResponse(res.data)
+
+
+@csrf_exempt
+def file_post(request, pk):
+    data = json.loads(request.body)
+    form = FileForm(request=request, data=data)
+    res = ApiResponse()
+    if form.is_valid():
+        data_dic = form.cleaned_data
+        data_dic.pop('etag')
+        data_dic.update({
+            'project': request.project,
+            'file_type': 1,
+            'update_user': request.authentication
+        })
+        instance = models.File.objects.create(**data_dic)
+        res.id = instance.id
+        res.name = instance.name
+        res.size = instance.size
+        res.updatedatetime = instance.update_datetime
+        res.username = instance.update_user.username
+        return JsonResponse(res.data)
+    else:
+        res.code = 0
+        res.msg = form.errors
         return JsonResponse(res.data)
