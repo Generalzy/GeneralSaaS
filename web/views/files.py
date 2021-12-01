@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from utils.response import ApiResponse
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from web.forms import FileModelForm, FileForm
 from web import models
 from libs.tencent.cos import delete_file, delete_files, credentials
@@ -102,6 +102,9 @@ def file_credentials(request, pk):
                 res.code = 0
                 res.msg = f'{item.get("name")}超出限制(最大{single_size}Mb),请升级套餐'
                 return JsonResponse(res.data)
+            elif len(item.get('name')) > 32:
+                res.code = 0
+                res.msg = f'{item.get("name")}文件名过长'
             else:
                 total_size += item.get('size')
         use_space = request.project.use_space * 1024 * 1024 * 1024  # 转为字节
@@ -109,6 +112,7 @@ def file_credentials(request, pk):
             res.code = 0
             res.msg = '项目容量超额，请升级套餐'
             return JsonResponse(res.data)
+
         data = credentials(bucket=request.project.bucket)
         res.tmp = data
         return JsonResponse(res.data)
@@ -138,3 +142,14 @@ def file_post(request, pk):
         res.code = 0
         res.msg = form.errors
         return JsonResponse(res.data)
+
+
+def down_load(request, pk, pfile):
+    if request.method == 'GET':
+        import requests
+        from django.utils.encoding import escape_uri_path
+        file_obj = models.File.objects.filter(pk=pfile).first()
+        res = requests.get(file_obj.path)
+        response = HttpResponse(res.iter_content(), content_type='application/octet-stream')
+        response['Content-Disposition'] = f"attachment;filename={escape_uri_path(file_obj.name)}"
+        return response

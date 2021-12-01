@@ -11,7 +11,7 @@ def all_project(request):
     mine_projects = models.Project.objects.filter(creator=request.authentication)
     # 创建所有参与的
     join_user_projects = models.ProjectUser.objects.filter(user=request.authentication)
-    return {'mine_projects': mine_projects, 'join_user_projects': join_user_projects,'request':request}
+    return {'mine_projects': mine_projects, 'join_user_projects': join_user_projects, 'request': request}
 
 
 @register.inclusion_tag('inclusion_tags/menu_list.html')
@@ -22,7 +22,7 @@ def all_menu_list(request):
         {'title': '统计', 'url': reverse("statistics", kwargs={'pk': request.project.id})},
         {'title': 'wiki', 'url': reverse("wiki", kwargs={'pk': request.project.id})},
         {'title': '文件', 'url': reverse("file", kwargs={'pk': request.project.id})},
-        {'title': '设置', 'url': reverse("settings", kwargs={'pk': request.project.id})}
+        # {'title': '设置', 'url': reverse("settings", kwargs={'pk': request.project.id})}
     ]
     for item in menu_list:
         current_url = request.path_info  # type:str
@@ -30,3 +30,10 @@ def all_menu_list(request):
             item['style'] = "color:white"
 
     return {'menu_list': menu_list}
+
+
+def get_size(value, v):
+    return f'{value / v:.3}'
+
+
+register.filter('get_size', get_size)

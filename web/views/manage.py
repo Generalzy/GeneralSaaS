@@ -18,6 +18,4 @@ def statistics(request, pk):
         return render(request, 'statistics.html')
 
 
-def settings(request, pk):
-    if request.method == 'GET':
-        return render(request, 'settings.html')
+

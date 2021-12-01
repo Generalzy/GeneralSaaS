@@ -20,6 +20,7 @@ from web.views import project
 from web.views import manage
 from web.views import wikis
 from web.views import files
+from web.views import setting
 
 urlpatterns = [
 
@@ -38,11 +39,12 @@ urlpatterns = [
     url(r'^manage/(?P<pk>\d+)/file/', files.file, name='file'),
     url(r'^manage/(?P<pk>\d+)/fileDelete/', files.file_delete, name='fileDelete'),
     url(r'^manage/(?P<pk>\d+)/credentials/', files.file_credentials, name='credentials'),
-    url(r'^manage/(?P<pk>\d+)/filePost/',files.file_post,name='filePost'),
+    url(r'^manage/(?P<pk>\d+)/filePost/', files.file_post, name='filePost'),
+    url(r'^manage/(?P<pk>\d+)/fileDownload/(?P<pfile>\d+)/', files.down_load, name='fileDownload'),
 
-
-    url(r'^manage/(?P<pk>\d+)/settings/', manage.settings, name='settings'),
-
+    url(r'^settingsDelete/', setting.delete, name='settingsDelete'),
+    url(r'^settings/', setting.settings, name='settings'),
+    url(r'^settingsPwd/', setting.password, name='settingsPwd'),
     # wiki
     url(r'^manage/(?P<pk>\d+)/wiki/', wikis.wiki, name='wiki'),
     url(r'^manage/(?P<pk>\d+)/wikiAdd/', wikis.wiki_add, name='wikiAdd'),

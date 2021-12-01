@@ -1,6 +1,6 @@
 from qcloud_cos import CosConfig
 from qcloud_cos import CosS3Client
-from . import conf
+from libs.tencent import conf
 from sts.sts import Sts
 from json import dumps
 
@@ -81,3 +81,21 @@ def credentials(bucket):
 
 def auth(bucket, key):
     return client.head_object(Bucket=bucket, Key=key)
+
+
+def delete_bucket(bucket):
+    contents = client.list_objects(Bucket=bucket).get('Contents')
+    while contents:
+        objects = {
+            "Quiet": "true",
+            'Object': [{'Key': item['Key']} for item in contents]
+        }
+        client.delete_objects(Bucket=bucket, Delete=objects)
+        contents = client.list_objects(Bucket=bucket).get('Contents')
+    # 找碎片删除
+    uploads = client.list_multipart_uploads(Bucket=bucket).get('Upload')
+    while uploads:
+        for item in uploads:
+            client.abort_multipart_upload(Bucket=bucket, Key=item['Key'], UploadId=item['UploadId'])
+        uploads = client.list_multipart_uploads(Bucket=bucket).get('Upload')
+    client.delete_bucket(Bucket=bucket)

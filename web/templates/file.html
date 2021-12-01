@@ -70,8 +70,8 @@
                             </div>
                             <input type="file" multiple class="btn" id="files">
                      </div>
-                     <div class="btn btn-success btn-xs">
-                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true" data-toggle="modal" data-target="#addModal"> 新建文件夹</span>
+                     <div class="btn btn-success btn-xs" data-toggle="modal" data-target="#addModal">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"> 新建文件夹</span>
                     </div>
                  </div>
           </div>
@@ -98,12 +98,19 @@
                         </a>
                     {% endif %}
                 </th>
-                <td>{% if file.file_type == 1 %}{{ file.size }}{% else %}<span>-----------</span>{% endif %}</td>
+              {% load inclusion_tag %}
+                <td>{% if file.file_type == 1 %}{{ file.size|get_size:1048576 }}Mb{% else %}<span>-----------</span>{% endif %}</td>
                 <td>{{ file.update_user.username }}</td>
                 <td>{{ file.update_datetime }}</td>
                 <td>
                     <div>
                        <span fid="{{ file.id }}" class="glyphicon glyphicon-trash delete" aria-hidden="true" style="color: red" data-toggle="modal" data-target="#alertModal"></span>
+                        <span>　</span>
+                        {% if file.file_type == 1 %}
+                        <a href="{% url 'fileDownload' pk=request.project.id pfile=file.id %}">
+                            <span class="glyphicon glyphicon-download" aria-hidden="true" style="color: green"></span>
+                        </a>
+                        {% endif %}
                     </div>
                 </td>
               </tr>
@@ -187,6 +194,7 @@
             $tbody.empty()
             let cos = new COS({
                 // getAuthorization 必选参数
+                // 后台仅仅做了size限制
                 getAuthorization: function (options, callback) {
                     // 异步获取临时密钥
                     $.post('{% url 'credentials' pk=request.project.id %}',
@@ -213,8 +221,7 @@
                         }
                     });
 
-                    $.each(file_list,function (index,file_obj){
-
+            $.each(file_list,function (index,file_obj){
                         var $tr=$('#templates').find('tr').clone()
                         $tr.find('.name').text(file_obj.name)
                         $tbody.append($tr);
@@ -261,52 +268,28 @@
                                                     <div>
                                                        <span fid="${res.id}" class="glyphicon glyphicon-trash delete" aria-hidden="true" style="color: red" data-toggle="modal" data-target="#alertModal"></span>
                                                     </div>
+                                                   <a href="#">
+                                                        <span class="glyphicon glyphicon-download" aria-hidden="true" style="color: green"></span>
+                                                   </a>
                                                 </td>
                                               </tr>
                                         `
                                         $('#showTbody').append(tm)
                                         }
+                                        else
+                                        {
+                                            $tr.find('.error').text('上传失败')
+                                        }
                                     }
                                 })
                             }
-                            else
-                            {
-                                $tr.find('error').text('上传失败')
-                            }
                         });
                     })
+
                 })
-
-        $('#go').click(function (){
-            $('#uploadProgress').addClass('hide')
-        })
-
-        $('#create').click(function (){
-            $.ajax({
-                url:location.href,
-                type:'post',
-                data:$('#fileForm').serialize(),
-                dataType:'json',
-                success:function (res){
-                    if(res.code)
-                    {
-                        location.reload()
-                    }
-                    else{
-                          $.each(res.errors,function (index,obj)
-                                    {
-                                        let targetId='#id_'+index;$(targetId).next().text(obj[0]).parent().addClass('has-error')
-                                    }
-                                )
-                    }
-                }
-            })
-        })
-
-        $('input').click(function (){
-            $(this).next().text('').parent().removeClass('has-error')
-        })
-
+        $('#go').click(function(){$('#uploadProgress').addClass('hide')})
+        $('#create').click(function(){$.ajax({url:location.href,type:'post',data:$('#fileForm').serialize(),dataType:'json',success:function(res){if(res.code){location.reload()}else{$.each(res.errors,function(index,obj){let targetId='#id_'+index;$(targetId).next().text(obj[0]).parent().addClass('has-error')})}}})})
+        $('input').click(function(){$(this).next().text('').parent().removeClass('has-error')})
         $('.delete').click(function (){
              let fid=$(this).attr('fid')
             swal({
@@ -318,7 +301,8 @@
                   confirmButtonText: "确定",
                   cancelButtonText: "取消",
                   closeOnConfirm: false,
-                  closeOnCancel: false
+                  closeOnCancel: false,
+                    showLoaderOnConfirm: true
                 },
                 function(isConfirm) {
                   if (isConfirm) {
@@ -338,7 +322,5 @@
                   }
                 });
         })
-
-
     </script>
 {% endblock %}

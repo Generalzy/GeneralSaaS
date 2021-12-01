@@ -65,7 +65,7 @@ class Project(models.Model):
     star = models.BooleanField(verbose_name='星标', default=False)
 
     join_count = models.SmallIntegerField(verbose_name='参与人数', default=1)
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', on_delete=models.DO_NOTHING)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', on_delete=models.CASCADE)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
     bucket = models.CharField(max_length=128, verbose_name='桶')
@@ -73,8 +73,8 @@ class Project(models.Model):
 
 
 class ProjectUser(models.Model):
-    user = models.ForeignKey(verbose_name='参与者', to='UserInfo', on_delete=models.DO_NOTHING)
-    project = models.ForeignKey(verbose_name='项目', to='Project', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(verbose_name='参与者', to='UserInfo', on_delete=models.CASCADE)
+    project = models.ForeignKey(verbose_name='项目', to='Project', on_delete=models.CASCADE)
     stat = models.BooleanField(verbose_name='星标', default=False)
     create_time = models.DateTimeField(verbose_name='加入时间', auto_now_add=True)
 
@@ -101,8 +101,8 @@ class File(models.Model):
     name = models.CharField(verbose_name='名称', max_length=32)
     key = models.CharField(verbose_name='文件存储在cos中的key', max_length=128, null=True, blank=True)
     size = models.IntegerField(verbose_name='文件大小', null=True, blank=True)
-    path=models.CharField(verbose_name='文件路径',max_length=255,null=True,blank=True)
+    path = models.CharField(verbose_name='文件路径', max_length=255, null=True, blank=True)
     parent = models.ForeignKey(verbose_name='父目录', on_delete=models.CASCADE, to='File', blank=True, null=True,
                                related_name='child')
-    update_user = models.ForeignKey(verbose_name='更新者', to='UserInfo', on_delete=models.DO_NOTHING)
+    update_user = models.ForeignKey(verbose_name='更新者', to='UserInfo', on_delete=models.CASCADE)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)

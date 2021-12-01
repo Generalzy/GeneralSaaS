@@ -9,4 +9,5 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GeneralSaaS.settings")
 django.setup()
 from web import models
 
-print(models.Project.objects.filter(pk=1, creator_id=6).values('bucket'))
+p=models.Project.objects.filter(pk=10).first()
+print(p.delete())
