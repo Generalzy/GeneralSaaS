@@ -21,7 +21,7 @@ from web.views import manage
 from web.views import wikis
 from web.views import files
 from web.views import setting
-
+from web.views import issues
 urlpatterns = [
 
     # 项目管理
@@ -33,7 +33,8 @@ urlpatterns = [
 
     # 具体项目
     url(r'^manage/(?P<pk>\d+)/dashboard/', manage.dashboard, name='dashboard'),
-    url(r'^manage/(?P<pk>\d+)/issues/', manage.issues, name='issues'),
+    url(r'^manage/(?P<pk>\d+)/issues/detail/(?P<issue_id>\d+)/',issues.edit_issue,name='editIssue'),
+    url(r'^manage/(?P<pk>\d+)/issues/', issues.issues, name='issues'),
     url(r'^manage/(?P<pk>\d+)/statistics/', manage.statistics, name='statistics'),
     # file
     url(r'^manage/(?P<pk>\d+)/file/', files.file, name='file'),
@@ -42,6 +43,7 @@ urlpatterns = [
     url(r'^manage/(?P<pk>\d+)/filePost/', files.file_post, name='filePost'),
     url(r'^manage/(?P<pk>\d+)/fileDownload/(?P<pfile>\d+)/', files.down_load, name='fileDownload'),
 
+    # 设置
     url(r'^settingsDelete/', setting.delete, name='settingsDelete'),
     url(r'^settings/', setting.settings, name='settings'),
     url(r'^settingsPwd/', setting.password, name='settingsPwd'),

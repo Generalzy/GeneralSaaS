@@ -17,7 +17,8 @@ class BootStrapForm:
         for name, field in self.fields.items():
             if name in self.bootstrap_class_exclude:
                 continue
-            field.widget.attrs['class'] = 'form-control'
+            old_class = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = f'{old_class} form-control'
             field.widget.attrs['placeholder'] = f'请输入{field.label}'
 
 
@@ -244,3 +245,39 @@ class FileForm(forms.ModelForm):
             if etag != res.get('ETag') or size != int(res.get('Content-Length')):
                 raise ValidationError('etag或size错误')
             return self.cleaned_data
+
+
+class IssuesModelForm(BootStrapForm, forms.ModelForm):
+    class Meta:
+        model = models.Issues
+        exclude = ('create_time', 'creator', 'latest_update_time', 'project')
+        widgets = {
+            'assign': forms.Select(attrs={'class': "selectpicker", 'data-live-search': 'true'}),
+            'attention': forms.SelectMultiple(
+                attrs={'class': "selectpicker", 'data-live-search': 'true', 'data-actions-box': 'true'}),
+            'parent': forms.Select(attrs={'class': "selectpicker", 'data-live-search': 'true'}),
+        }
+
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # 问题类型不能为空，所以没有——--------
+        self.fields['issues_type'].choices = models.IssuesType.objects.filter(project=request.project).values_list(
+            'id', 'title')
+
+        # 模块可以为空，可以添加——---------
+        module_choices = [('', '---------')]
+        module_choices.extend(models.Module.objects.filter(project=request.project).values_list('id', 'title'))
+        self.fields['module'].choices = module_choices
+
+        # 指派和关注者只能是本项目的相关人员
+        total_user_list = [(request.project.creator.id, request.project.creator.username)]
+        total_user_list.extend(
+            models.ProjectUser.objects.filter(project=request.project).values_list('user_id', 'user__username'))
+        self.fields['attention'].choices = total_user_list
+        self.fields['assign'].choices = total_user_list
+
+        # 父问题
+        parent_choices = [('', '---------')]
+        parent_choices.extend(models.Issues.objects.filter(project=request.project).values_list('id', 'subject'))
+        self.fields['parent'].choices = parent_choices

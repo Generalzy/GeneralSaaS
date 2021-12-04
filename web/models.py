@@ -11,6 +11,9 @@ class UserInfo(models.Model):
 
     project_num = models.IntegerField(verbose_name='创建的项目数量', default=0)
 
+    def __str__(self):
+        return self.username
+
 
 class PricePolicy(models.Model):
     category_choices = (
@@ -106,3 +109,65 @@ class File(models.Model):
                                related_name='child')
     update_user = models.ForeignKey(verbose_name='更新者', to='UserInfo', on_delete=models.CASCADE)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
+
+
+class Module(models.Model):
+    project = models.ForeignKey(to='Project', verbose_name='项目', on_delete=models.CASCADE)
+    title = models.CharField(verbose_name='模块名', max_length=32)
+
+    def __str__(self):
+        return self.title
+
+
+class IssuesType(models.Model):
+    project = models.ForeignKey(to='Project', verbose_name='项目', on_delete=models.CASCADE)
+    title = models.CharField(verbose_name='类型名', max_length=32)
+
+    def __str__(self):
+        return self.title
+
+
+class Issues(models.Model):
+    project = models.ForeignKey(to='Project', verbose_name='项目', on_delete=models.CASCADE)
+    issues_type = models.ForeignKey(to='IssuesType', verbose_name='问题类型', on_delete=models.CASCADE)
+    module = models.ForeignKey(to='Module', verbose_name='模块', null=True, blank=True, on_delete=models.CASCADE)
+
+    subject = models.CharField(verbose_name='主题', max_length=80)
+    desc = models.TextField(verbose_name='问题描述')
+    priority_choice = (
+        ('danger', '高'),
+        ('warning', '中'),
+        ('success', '低')
+    )
+    priority = models.CharField(verbose_name='优先级', choices=priority_choice, max_length=12, default='danger')
+
+    status_choice = (
+        (1, '新建'),
+        (2, '处理中'),
+        (3, '已解决'),
+        (4, '已忽略'),
+        (5, '待反馈'),
+        (6, '已关闭'),
+        (7, '重新打开'),
+    )
+    status = models.SmallIntegerField(choices=status_choice, verbose_name='问题状态', default=1)
+
+    assign = models.ForeignKey(to="UserInfo", verbose_name='指派', related_name='task', null=True, blank=True,
+                               on_delete=models.CASCADE)
+
+    attention = models.ManyToManyField(verbose_name='关注者', to='UserInfo', related_name='observe', blank=True)
+    start_date = models.DateField(verbose_name='开始时间', null=True)
+    end_date = models.DateField(verbose_name='结束时间', null=True)
+    mode_choice = (
+        (1, '公开'),
+        (2, '隐私')
+    )
+    mode = models.SmallIntegerField(choices=mode_choice, verbose_name='模式', default=1)
+    parent = models.ForeignKey(to='Issues', related_name='child', verbose_name='父问题', on_delete=models.SET_NULL,
+                               null=True,blank=True)
+    creator = models.ForeignKey(to='UserInfo', related_name='creator_problem', on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    latest_update_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.subject

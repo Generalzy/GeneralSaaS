@@ -1,5 +1,216 @@
 {% extends 'bases/manage.html' %}
 
+
+
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'editor.md-master/css/editormd.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-select-1.13.14/dist/css/bootstrap-select.min.css' %}">
+    <style>
+        .title-list{
+            border-right: 1px solid #dddddd;
+            min-height: 500px;
+        }
+        .panel-default .panel-heading{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .content{
+            border-left: 1px solid #dddddd;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+        .forms-content{
+            margin-top: 10px;
+        }
+        .title-list ul{
+            padding-left: 15px;
+        }
+        .title-list ul a{
+            display: block;
+            padding: 5px 0;
+        }
+        .circle{
+            background-color:brown;
+            border-radius: 50%;
+            display: inline-block;
+            height: 15px;
+            width: 15px;
+            margin-top: 10px;
+        }
+    </style>
+{% endblock %}
 {% block content %}
-    <h1>问题</h1>
+    <div class="container">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-search" aria-hidden="true"> 筛 选</span></div>
+              <div class="panel-body">
+                    <h1>你大爷的筛选条件</h1>
+              </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true"> 问 题</span></div>
+              <div class="panel-body">
+                  <p>
+                    <button class="btn btn-success" data-toggle="modal" data-target="#addModal" id="create">新建问题</button>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#inviteModal">邀请成员</button>
+                  </p>
+                  <!-- Modal -->
+                        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                          <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">新建问题</h4>
+                              </div>
+                              <div class="modal-body clearfix">
+                                  <form class="form-horizontal" id="addForm">
+                                      {% csrf_token %}
+                                      {% for filed in form %}
+                                          {% if filed.name == 'desc' %}
+                                            <div class="form-group">
+                                            <label for="{{ filed.auto_id }}" class="col-sm-2 control-label">{{ filed.label }}</label>
+                                                <div id="editor">
+                                                   {{ filed }}
+                                                </div>
+                                            <span style="color: red">{{ filed.errors.0 }}</span>
+                                        </div>
+                                        {% else %}
+                                          <div class="form-group">
+                                                <label for="{{ filed.auto_id }}" class="col-sm-2 control-label">
+                                                    {{ filed.label }}
+                                                </label>
+                                                <div class="col-sm-10">
+                                                  {{ filed }}
+                                                   <span style="color:red">{{ filed.errors.0 }}</span>
+                                                </div>
+                                            </div>
+                                          {% endif %}
+                                        {% endfor %}
+                                  </form>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="submit">提交</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                  <!-- Modal -->
+                        <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                          <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content ">
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">邀请成员</h4>
+                              </div>
+                              <div class="modal-body">
+
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <table class="table">
+                      <tbody>
+                      {% for field in data %}
+                        <tr>
+                            <td class="number" style="padding-top: 0">
+                                <div class="circle"></div>
+                                <a target="_blank" href="{% url 'editIssue' pk=request.project.id issue_id=field.id %}" style="font-size: 15px">#{{ field.id }}</a>
+                            </td>
+                            <td class="issues">
+                                <div>
+                                    <a href="{% url 'editIssue' pk=request.project.id issue_id=field.id %}" target="_blank">{{ field.subject }}</a>
+                                </div>
+                                <br>
+                                <div class="tags">
+                                    <span class="label-warning label">{{ field.issues_type.title }}</span>&nbsp;&nbsp;&nbsp;
+                                    <span><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>{{ field.get_status_display }}</span>&nbsp;&nbsp;&nbsp;
+                                    <span><span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{ field.creator.username }}</span>&nbsp;&nbsp;&nbsp;
+                                    {% if field.assign %}
+                                    <span><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span>{{ field.assign.username }}</span>&nbsp;&nbsp;&nbsp;
+                                    {% endif %}
+                                    <span><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{ field.end_date }} 截止</span>&nbsp;&nbsp;&nbsp;
+                                    <span><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{ field.latest_update_time }} 更新</span>
+                                </div>
+                            </td>
+                        </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+            <div class="text-center" style="">
+                {{ page_obj.page_html |safe }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {% load static %}
+    <script src="{% static 'editor.md-master/editormd.min.js' %}"></script>
+    <script src="{% static 'bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'bootstrap-select-1.13.14/dist/js/bootstrap-select.min.js' %}"></script>
+    <script src="{% static 'bootstrap-select-1.13.14/js/i18n/defaults-zh_CN.js' %}"></script>
+    <script>
+
+        $(function (){
+            initmdeditor();
+        });
+        function initmdeditor(){
+            editormd('editor',{
+                placeholder:'在这编写你的文章',
+                height:'300px',
+                width:'700px',
+                path:'{% static 'editor.md-master/lib/' %}',
+                imageUpload:true,
+                imageFormats:['jpg','jpeg','png'],
+                imageUploadURL:'{% url 'wikiUpload' pk=request.project.id %}'
+            })
+        }
+        $('#id_start_date,#id_end_date').datepicker({
+            language:'zh-CN',
+            autoclose: true,
+            format:'yyyy-mm-dd',
+            startDate:0,
+        })
+        $('#submit').click(function (){
+            $.ajax({
+                url:'{% url 'issues' pk=request.project.id %}',
+                type:'post',
+                data:$('#addForm').serialize(),
+                dataType:'json',
+                success:function (res){
+                    if (res.code){
+                        location.reload()
+                    }
+                    else{
+                            $.each(res.msg,function (index,obj)
+                             {
+                                 let targetId='#id_'+index;
+                                 $(targetId).next().text(obj[0]).parent().addClass('has-error')
+                             }
+                             )
+                    }
+                }
+            })
+        })
+
+        $('input').click(function (){
+            $(this).next().text('').parent().removeClass('has-error')
+        })
+    </script>
+
 {% endblock %}

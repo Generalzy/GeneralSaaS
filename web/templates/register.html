@@ -68,7 +68,8 @@
                     {location.href=res.url;}
                     else
                     {$.each(res.errors,function (index,obj)
-                        {let targetId='#id_'+index;$(targetId).next().text(obj[0]).parent().addClass('has-error')})}}})})
+                        {let targetId='#id_'+index;
+                            $(targetId).next().text(obj[0]).parent().addClass('has-error')})}}})})
         $('input').click(function (){
             $(this).next().text('').parent().removeClass('has-error')
         })
