@@ -164,10 +164,24 @@ class Issues(models.Model):
     )
     mode = models.SmallIntegerField(choices=mode_choice, verbose_name='模式', default=1)
     parent = models.ForeignKey(to='Issues', related_name='child', verbose_name='父问题', on_delete=models.SET_NULL,
-                               null=True,blank=True)
+                               null=True, blank=True)
     creator = models.ForeignKey(to='UserInfo', related_name='creator_problem', on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     latest_update_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.subject
+
+
+class IssuesReply(models.Model):
+    reply_type_choices = (
+        (1, '修改记录'),
+        (2, '回复')
+    )
+    reply_type = models.SmallIntegerField(choices=reply_type_choices)
+
+    issues = models.ForeignKey(to='Issues', verbose_name='问题', on_delete=models.CASCADE)
+    content = models.TextField()
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', on_delete=models.CASCADE)
+    creat_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    reply = models.ForeignKey(verbose_name='回复', to='IssuesReply', on_delete=models.CASCADE, null=True, blank=True)

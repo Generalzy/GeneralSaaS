@@ -1,16 +1,42 @@
 {% extends 'bases/manage.html' %}
 
 {% block css %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'editor.md-master/css/editormd.preview.min.css' %}">
+    {% load  static %}
+    <link rel="stylesheet" href="{% static 'editor.md-master/css/editormd.min.css' %}">
+    <style>
+        .avatar{
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background-color: darkblue;
+            color: whitesmoke;
+            position: absolute;
+            text-align: center;
+            line-height: 40px;
+            font-size: 30px;
+        }
+        .content{
+            margin-left: 60px;
+        }
+        .msg{
+            color: #8c8c8c;
+            margin-left: 50px;
+        }
+        .element{
+            margin-left: 20px;
+        }
+        .child{
+            margin-left: 20px;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-7">
                 <div class="panel panel-default">
-                  <div class="panel-heading">Panel heading without title</div>
+                  <div class="panel-heading"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>&nbsp;&nbsp;更新问题</div>
                   <div class="panel-body">
                     <div class="modal-body clearfix">
                       <form class="form-horizontal" id="addForm">
@@ -43,9 +69,25 @@
             </div>
             <div class="col-md-5">
                 <div class="panel panel-default">
-                  <div class="panel-heading">Panel heading without title</div>
+                  <div class="panel-heading"><span class="glyphicon glyphicon-check" aria-hidden="true"></span>&nbsp;&nbsp;评论</div>
                   <div class="panel-body">
-                    Panel content
+                      <form class="form form-horizontal">
+                          <div id="comment-list">
+
+                        </div>
+                      </form>
+                      <br>
+                      <hr>
+                    <div>
+                        <textarea name="" id="comment" cols="30" rows="10" class="form-control" style="resize: none">
+
+                        </textarea><br>
+                           <button id="submit" class="btn btn-primary" style="margin-right: 20px;">提交</button>
+                        <div class='hide label-default label' id="replyUser">
+                            回复 <span></span>
+                            <button onclick="removeReply()" class="btn btn-default btn-xs" style="color: #8c8c8c"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                        </div>
+                    </div>
                   </div>
                 </div>
             </div>
@@ -57,20 +99,114 @@
     {% load static %}
     <script src="{% static 'editor.md-master/editormd.min.js' %}"></script>
     <script>
-    /*
         $(function (){
             initmdeditor();
+            initIssuesReply();
         });
+
+        function saveDesc(){
+            let name='desc'
+            let val=EDITOR.getValue()
+            postAjaxData(name,val)
+        }
+
         function initmdeditor(){
-            editormd('editor',{
+            EDITOR=editormd('editor',{
                 height:'300px',
-                width:'700px',
+                width:'660px',
                 path:'{% static 'editor.md-master/lib/' %}',
                 imageUpload:true,
                 imageFormats:['jpg','jpeg','png'],
-                imageUploadURL:'{% url 'wikiUpload' pk=request.project.id %}'
+                toolbarAutoFixed:false,
+                imageUploadURL:'{% url 'wikiUpload' pk=request.project.id %}',
+                toolbarIcons:function (){
+                    return ['bold','hr','del','italic','quote','|','image','preview','watch','fullscreen','||','save']
+                },
+                toolbarCustomIcons:{
+                    save:"<input type='button' value='保存' onclick='saveDesc()' class='btn btn-xs btn-success' />"
+                },
+                onload:function (){
+                    this.previewing();
+                }
             })
         }
-    */
+
+
+        function initIssuesReply(){
+            $.ajax({
+                url:'{% url 'recordIssue' pk=request.project.id issue_id=issue.id%}',
+                type:'get',
+                dataType:'json',
+                success:function (res){
+                    $.each(res.data,function (index,obj){
+                        let template=`
+                        <div class="clearfix" id='issue_${obj.id}'>
+                            <div class="avatar">
+                                <span>${obj.name}</span>
+                            </div>
+                            <pre class="content">${obj.content}</pre>
+                            <div class="desc">
+                                <div class="msg">
+                                    <span class="element"><span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span> ${obj.reply_type_text}</span>
+                                    <span class="element"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${obj.creator}</span>
+                                    <span class="element"><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> ${obj.create_time}</span>
+                                    <span class="element"><a href="#" onclick="toComment(${obj.id},'${obj.creator}')"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> 回复</a></span>
+                                </div>
+                            </div>
+                                <div class="child"></div>
+                        </div>
+                        `
+                        if (! obj.parent)
+                        {
+                          $('#comment-list').append(template)
+                        }
+                        else{
+                            let $id='#issue_'+obj.parent
+                            $($id).children('.child').append(template)
+                        }
+                    })
+                }
+            })
+        }
+
+        function toComment(id,name){
+            $('#replyUser').removeClass('hide').attr('parent',id).children('span:first-child').text(name)
+        }
+        function removeReply(){
+            $('#replyUser').addClass('hide').attr('parent',null).children('span:first-child').text('')
+        }
+
+        $('#submit').click(function (){
+            $.ajax({
+                url:'{% url 'recordIssue' pk=request.project.id issue_id=issue_id %}',
+                type:'post',
+                data:{'parent':$('#replyUser').attr('parent'),'val':$('#comment').val().trim()},
+                dataType: 'json',
+                success:function (res){
+                    if (res.code)
+                    {
+                        location.reload()
+                    }
+                }
+            })
+        })
+
+        $('#addForm').find('#id_status').change(function (){
+            let name=$(this).attr('name')
+            let val=$(this).val()
+            postAjaxData(name,val)
+        })
+        function postAjaxData(name,val){
+            $.ajax({
+                url:'{% url 'editIssue' pk=request.project.id issue_id=issue_id %}',
+                type:'post',
+                dataType:'json',
+                contentType:'application/json',
+                data:JSON.stringify({'field':name,'value':val}),
+                success:function (res){
+                    console.log(res)
+                }
+            })
+        }
     </script>
 {% endblock %}

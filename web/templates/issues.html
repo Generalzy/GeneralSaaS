@@ -41,6 +41,23 @@
             width: 15px;
             margin-top: 10px;
         }
+        .filter-area .item .check_list .cell{
+            margin-right: 10px;
+        }
+        .filter-area .item .check_list label{
+            font-size: 13px;
+            margin-left: 15px;
+            font-weight: 200;
+            display: inline-block;
+            min-width: 65px;
+        }
+        .filter-area .item{
+            margin-bottom: 15px;
+        }
+
+        .filter-area .item .title{
+            padding: 5px 0;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -49,7 +66,17 @@
             <div class="panel panel-default">
               <div class="panel-heading"><span class="glyphicon glyphicon-search" aria-hidden="true"> 筛 选</span></div>
               <div class="panel-body">
-                    <h1>你大爷的筛选条件</h1>
+                    <div class="filter-area">
+                    <div class="item">
+                         <div class="title">问题状态</div>
+                        <div class="check_list">
+                            {% for filter in check_filter %}
+                                {{ filter }}
+                            {% endfor %}
+                            <label for="" class="cell"><input type="radio" value="" name="status">全部</label>
+                        </div>
+                    </div>
+                    </div>
               </div>
             </div>
         </div>
@@ -210,6 +237,11 @@
 
         $('input').click(function (){
             $(this).next().text('').parent().removeClass('has-error')
+        })
+
+        $(':radio').click(function (){
+                let status=$(this).val()
+                location.href='{% url 'issues' pk=request.project.id %}'+'?status='+status
         })
     </script>
 

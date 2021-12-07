@@ -27,3 +27,6 @@
     2       1           小周杰伦          100kb     1          文件           null        xxx              22
 ## issues表
     ID      标题      内容       类型(FK)         模块(FK)          状态      优先级     指派      关注      开始时间        截止时间    模式      父问题
+
+## 评论表
+    ID      content     type        creator     time        project         parent      

@@ -34,6 +34,7 @@ urlpatterns = [
     # 具体项目
     url(r'^manage/(?P<pk>\d+)/dashboard/', manage.dashboard, name='dashboard'),
     url(r'^manage/(?P<pk>\d+)/issues/detail/(?P<issue_id>\d+)/',issues.edit_issue,name='editIssue'),
+    url(r'^manage/(?P<pk>\d+)/issues/record/(?P<issue_id>\d+)/',issues.record_issue,name='recordIssue'),
     url(r'^manage/(?P<pk>\d+)/issues/', issues.issues, name='issues'),
     url(r'^manage/(?P<pk>\d+)/statistics/', manage.statistics, name='statistics'),
     # file

@@ -1,5 +1,5 @@
 class Pagination(object):
-    def __init__(self, current_page, all_count, per_page_num=10, pager_count=11):
+    def __init__(self, current_page, all_count, per_page_num=10, pager_count=11, status=''):
         """
         封装分页相关数据
         :param current_page: 当前页
@@ -16,7 +16,7 @@ class Pagination(object):
             current_page = 1
 
         self.current_page = current_page
-
+        self.status=status
         self.all_count = all_count
         self.per_page_num = per_page_num
 
@@ -64,30 +64,30 @@ class Pagination(object):
                     <ul class='pagination'>
                 ''']
         # 添加前面的nav和ul标签
-        first_page = f'<li><a href="?page={1}">首页</a></li>'
+        first_page = f'<li><a href="?page={1}&status={self.status}">首页</a></li>'
         page_html_list.append(first_page)
 
         if self.current_page <= 1:
             prev_page = f'<li class="disabled"><a href="#">上一页</a></li>'
         else:
-            prev_page = f'<li><a href="?page={self.current_page-1}">上一页</a></li>'
+            prev_page = f'<li><a href="?page={self.current_page - 1}&status={self.status}">上一页</a></li>'
 
         page_html_list.append(prev_page)
 
         for i in range(pager_start, pager_end):
             if i == self.current_page:
-                temp = f'<li class="active"><a href="?page={i}">{i}</a></li>'
+                temp = f'<li class="active"><a href="?page={i}&status={self.status}">{i}</a></li>'
             else:
-                temp = f'<li><a href="?page={i}">{i}</a></li>'
+                temp = f'<li><a href="?page={i}&status={self.status}">{i}</a></li>'
             page_html_list.append(temp)
 
         if self.current_page >= self.all_pager:
             next_page = f'<li class="disabled"><a href="#">下一页</a></li>'
         else:
-            next_page = f'<li><a href="?page={self.current_page+1}">下一页</a></li>'
+            next_page = f'<li><a href="?page={self.current_page + 1}&status={self.status}">下一页</a></li>'
         page_html_list.append(next_page)
 
-        last_page = f'<li><a href="?page={self.all_pager}">尾页</a></li>'
+        last_page = f'<li><a href="?page={self.all_pager}&status={self.status}">尾页</a></li>'
         page_html_list.append(last_page)
         # 尾部添加标签
         page_html_list.append('''

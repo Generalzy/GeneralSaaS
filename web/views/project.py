@@ -47,9 +47,6 @@ def project_list(request):
                 form.save()
                 user.project_num += 1
                 user.save()
-            models.IssuesType.objects.create(title='任务', project=request.project)
-            models.IssuesType.objects.create(title='功能', project=request.project)
-            models.IssuesType.objects.create(title='BUG', project=request.project)
             return JsonResponse(res.data)
         else:
             res.code = 0
