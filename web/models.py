@@ -185,3 +185,20 @@ class IssuesReply(models.Model):
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', on_delete=models.CASCADE)
     creat_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     reply = models.ForeignKey(verbose_name='回复', to='IssuesReply', on_delete=models.CASCADE, null=True, blank=True)
+
+
+class ProjectInvite(models.Model):
+    project = models.ForeignKey(verbose_name='所属项目', to='Project', on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, unique=True)
+    count = models.IntegerField(null=False)
+    use_count = models.PositiveIntegerField(default=1)
+    period_choices = (
+        (30, '30分钟'),
+        (60, '1小时'),
+        (300, '5小时'),
+        (1440, '24小时'),
+    )
+    period = models.IntegerField(choices=period_choices, default=1440)
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    creator = models.ForeignKey(to='UserInfo', verbose_name='创建者', related_name='create_invite',
+                                on_delete=models.CASCADE)

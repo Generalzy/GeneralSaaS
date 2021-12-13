@@ -281,3 +281,9 @@ class IssuesModelForm(BootStrapForm, forms.ModelForm):
         parent_choices = [('', '---------')]
         parent_choices.extend(models.Issues.objects.filter(project=request.project).values_list('id', 'subject'))
         self.fields['parent'].choices = parent_choices
+
+
+class InviteModelForm(BootStrapForm, forms.ModelForm):
+    class Meta:
+        model = models.ProjectInvite
+        fields = ('period', 'count')

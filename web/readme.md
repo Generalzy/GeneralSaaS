@@ -29,4 +29,7 @@
     ID      标题      内容       类型(FK)         模块(FK)          状态      优先级     指派      关注      开始时间        截止时间    模式      父问题
 
 ## 评论表
-    ID      content     type        creator     time        project         parent      
+    ID      content     type        creator     time        project         parent   
+## 邀请表
+    ID      有效期        数量        已使用数量     创建者     邀请码                      所属项目    
+    1        23h           2            1           8       26d25d25d25er25er``            1

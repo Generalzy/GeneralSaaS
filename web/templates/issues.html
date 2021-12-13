@@ -131,18 +131,37 @@
                         </div>
                   <!-- Modal -->
                         <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                          <div class="modal-dialog modal-lg" role="document">
+                          <div class="modal-dialog" role="document">
                             <div class="modal-content ">
                               <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="myModalLabel">邀请成员</h4>
+                                <h4 class="modal-title" id="myModalLabel">邀请成员</h4> <span>您还能邀请:{{ number }}人</span>
                               </div>
                               <div class="modal-body">
-
+                                        <form class="form form-horizontal" id="inviteForm">
+                                        {% csrf_token %}
+                                            {% for filed in invite_form %}
+                                                <div class="form-group">
+                                                <label for="{{ filed.auto_id }}" class="col-sm-2 control-label">
+                                                    {{ filed.label }}
+                                                </label>
+                                                <div class="col-sm-10">
+                                                  {{ filed }}
+                                                   <span style="color:red">{{ filed.errors.0 }}</span>
+                                                </div>
+                                                </div>
+                                            {% endfor %}
+                                        </form>
+                                  <hr>
+                                <div class='clearfix'>
+                                   <button class="btn btn-success pull-right" id="genInviteCode">生成邀请码</button>
+                                </div>
+                                  <div class="hide" id="codeShower">
+                                      <label for="code">邀请码</label>
+                                      <input type="text" class="form-control" value="的哈哈的哈" id="code">
+                                  </div>
                               </div>
                               <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
                               </div>
                             </div>
                           </div>
@@ -242,6 +261,19 @@
         $(':radio').click(function (){
                 let status=$(this).val()
                 location.href='{% url 'issues' pk=request.project.id %}'+'?status='+status
+        })
+
+        $('#genInviteCode').click(function (){
+            $.ajax({
+                url:'{% url 'codeIssues' pk=request.project.id %}',
+                type:'post',
+                dataType: 'json',
+                data:$('#inviteForm').serialize(),
+                success:function (res){
+                    $('#code').val(res.code)
+                    $('#codeShower').removeClass('hide')
+                }
+            })
         })
     </script>
 

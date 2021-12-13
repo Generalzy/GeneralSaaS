@@ -1,6 +1,83 @@
 {% extends 'bases/manage.html' %}
 
 
+{% block css %}
+    <style>
+    .status{
+        margin-bottom: 10px;
+    }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <h1>概览</h1>
+    <div class="container-fluid">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-signal" aria-hidden="true"> 新增问题趋势</span></div>
+              <div class="panel-body">
+                  <br><br><br><br><br><br><br><br><br><br>
+              </div>
+            </div>
+            <div class="row">
+               <div class="col-md-6">
+                        <div class="panel panel-default">
+                          <div class="panel-heading"><span class="glyphicon glyphicon-pushpin" aria-hidden="true"> 问题</span></div>
+                          <div class="panel-body">
+                              {% for val in status_dic.values %}
+                                  <div class="col-md-4 status">
+                                      {{ val.text }}：{{ val.count }}
+                                  </div>
+                              {% endfor %}
+                          </div>
+                        </div>
+                </div>
+                <div class="col-md-6">
+                        <div class="panel panel-default">
+                          <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"> 项目成员</span></div>
+                          <div class="panel-body">
+                              {% for user in users %}
+                                  <div class="col-md-4">
+                                  <span class="glyphicon glyphicon-user" aria-hidden="true">{{ user }}</span>
+                                  </div>
+                              {% endfor %}
+                          </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"> 详细</span></div>
+              <div class="panel-body">
+                  <table class="table">
+                    <tbody>
+                        <tr>
+                            <td class="label-left">项目名称：</td>
+                            <td>{{ request.project.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-left">项目描述：</td>
+                            <td>{{ request.project.desc }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-left">创建时间：</td>
+                            <td>{{ request.project.create_datetime }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-left">项目空间：</td>
+                            <td>{{ request.project.use_space }}GB</td>
+                        </tr>
+                    </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading"><span class="glyphicon glyphicon-grain" aria-hidden="true"> 动态</span></div>
+              <div class="panel-body">
+                  <br><br><br><br><br>
+              </div>
+            </div>
+
+        </div>
+    </div>
 {% endblock %}

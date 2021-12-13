@@ -1,8 +1,10 @@
 import json
-from django.shortcuts import render, redirect, HttpResponse
+import uuid
+from django.core.cache import cache
+from django.shortcuts import render, redirect, HttpResponse, reverse
 from django.http import JsonResponse
 from utils.page import Pagination
-from web.forms import IssuesModelForm
+from web.forms import IssuesModelForm, InviteModelForm
 from web import models
 from utils.response import ApiResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -12,9 +14,11 @@ from utils.checkfilter import CheckFilter
 def issues(request, pk):
     res = ApiResponse()
     if request.method == 'GET':
+        trans_obj = models.Transaction.objects.filter(user=request.authentication).first()
+        number = trans_obj.price_policy.project_member - request.project.join_count
+        invite_form = InviteModelForm()
         status = request.GET.get('status', None)
         current_page = request.GET.get('page')
-        print(status)
         check_filter = CheckFilter(models.Issues.status_choice, request)
         if status:
             temp = models.Issues.objects.filter(project=request.project, status=status).all()
@@ -22,10 +26,11 @@ def issues(request, pk):
             temp = models.Issues.objects.filter(project=request.project).all()
         all_count = temp.count()
         form = IssuesModelForm(request=request)
-        page_obj = Pagination(current_page=current_page, all_count=all_count,status=status)
+        page_obj = Pagination(current_page=current_page, all_count=all_count, status=status)
         data = temp[page_obj.start:page_obj.end]
         return render(request, 'issues.html',
-                      {'page_obj': page_obj, 'form': form, 'data': data, 'check_filter': check_filter})
+                      {'page_obj': page_obj, 'form': form, 'data': data, 'check_filter': check_filter,
+                       'invite_form': invite_form, 'number': number})
     elif request.method == 'POST':
         form = IssuesModelForm(data=request.POST, request=request)
         if form.is_valid():
@@ -81,3 +86,57 @@ def record_issue(request, pk, issue_id):
         models.IssuesReply.objects.create(reply_type=2, reply_id=parent, content=content,
                                           creator=request.authentication, issues_id=issue_id)
         return JsonResponse(res.data)
+
+
+def code(request, pk):
+    if request.method == 'POST':
+        res = ApiResponse()
+        form = InviteModelForm(data=request.POST)
+        trans_obj = models.Transaction.objects.filter(user=request.authentication).first()
+        number = trans_obj.price_policy.project_member
+        join_count = request.project.join_count
+        if form.is_valid():
+            if request.authentication != request.project.creator:
+                res.code = '只有项目创建者才可以邀请成员!'
+            elif join_count >= number:
+                res.code = '本项目人员已经达到限额，无法生成邀请码！'
+            else:
+                geb_code = f'{uuid.uuid4()}'
+                res.code = f'{request.scheme}://{request.get_host()}{reverse("inviteIssue")}/?code={geb_code}&pk={pk}'
+                form.instance.creator = request.authentication
+                form.instance.project = request.project
+                form.instance.code = geb_code
+                form.save()
+                period = form.cleaned_data.get('period')
+                if period:
+                    cache.set(f'{pk}_invite_code_', geb_code, period * 60)
+                else:
+                    cache.set(f'{pk}_invite_code_', geb_code)
+        else:
+            res.code = '异常错误！'
+        return JsonResponse(res.data)
+
+
+def invite(request):
+    if request.method == 'GET':
+        pk = request.GET.get('pk')
+        geb_code = request.GET.get('code')
+
+        project_obj = models.Project.objects.filter(pk=pk).first()
+        trans_obj = models.Transaction.objects.filter(user=request.authentication).first()
+        number = trans_obj.price_policy.project_member
+        join_count = project_obj.join_count
+
+        ture_code = cache.get(f'{pk}_invite_code_', None)
+        invite_obj = models.ProjectInvite.objects.filter(project_id=pk).first()
+
+        if geb_code == ture_code and invite_obj.creator != request.authentication:
+            msg = '成功加入此项目'
+            models.ProjectUser.objects.create(project_id=pk, user=request.authentication)
+            project_obj.join_count += 1
+            project_obj.save()
+        elif join_count >= number:
+            msg = '加入失败，项目人员已满'
+        else:
+            msg = '未知错误'
+        return render(request, 'issueInvite.html', {'msg': msg})
