@@ -22,6 +22,7 @@ from web.views import wikis
 from web.views import files
 from web.views import setting
 from web.views import issues
+
 urlpatterns = [
 
     # 项目管理
@@ -32,9 +33,10 @@ urlpatterns = [
     url(r'^project/unstar/(?P<ptype>\w+)/(?P<pk>\d+)/', project.project_unstar, name='project_unstar'),
 
     # 具体项目
+    url(r'^manage/(?P<pk>\d+)/dashboard/chart', manage.chart, name='dashboardChart'),
     url(r'^manage/(?P<pk>\d+)/dashboard/', manage.dashboard, name='dashboard'),
-    url(r'^manage/(?P<pk>\d+)/issues/detail/(?P<issue_id>\d+)/',issues.edit_issue,name='editIssue'),
-    url(r'^manage/(?P<pk>\d+)/issues/record/(?P<issue_id>\d+)/',issues.record_issue,name='recordIssue'),
+    url(r'^manage/(?P<pk>\d+)/issues/detail/(?P<issue_id>\d+)/', issues.edit_issue, name='editIssue'),
+    url(r'^manage/(?P<pk>\d+)/issues/record/(?P<issue_id>\d+)/', issues.record_issue, name='recordIssue'),
     url(r'^manage/(?P<pk>\d+)/issues/gencode', issues.code, name='codeIssues'),
     url(r'^issues/invite', issues.invite, name='inviteIssue'),
     url(r'^manage/(?P<pk>\d+)/issues/', issues.issues, name='issues'),

@@ -17,7 +17,7 @@ def issues(request, pk):
         trans_obj = models.Transaction.objects.filter(user=request.authentication).first()
         number = trans_obj.price_policy.project_member - request.project.join_count
         invite_form = InviteModelForm()
-        status = request.GET.get('status', None)
+        status = request.GET.get('status', '')
         current_page = request.GET.get('page')
         check_filter = CheckFilter(models.Issues.status_choice, request)
         if status:
