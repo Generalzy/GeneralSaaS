@@ -22,6 +22,7 @@ from web.views import wikis
 from web.views import files
 from web.views import setting
 from web.views import issues
+from web.views import order
 
 urlpatterns = [
 
@@ -67,6 +68,11 @@ urlpatterns = [
     url(r'^login/', account.login, name='login'),
     url(r'^logout/', account.logout, name='logout'),
     url(r'^index/', home.index),
+
+    # 充值页面
+    url('^magic/', order.pay, name='pay'),
+    url('^order/', order.order, name='order'),
+    url('^result/', order.pay_result, name='result'),
 
     url(r'^', home.index, name='index'),
 ]

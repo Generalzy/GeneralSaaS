@@ -6,7 +6,6 @@ from datetime import datetime
 
 
 class AuthMiddleWare(MiddlewareMixin):
-
     def process_request(self, request):
         username = request.session.get('username', None)
         user_obj = models.UserInfo.objects.filter(username=username).first()
@@ -31,9 +30,9 @@ class LoginMiddleWare(MiddlewareMixin):
                 request.price = identity.price_policy
 
     def process_view(self, request, view, *args, **kwargs):
+
         if not request.path_info.startswith('/manage/'):
             return
-
         pk = args[-1].get('pk')
         # 我创建的项目
         # 把项目对象也添加到request中
@@ -43,7 +42,7 @@ class LoginMiddleWare(MiddlewareMixin):
             return
 
         # 我参与的项目
-        uproject_obj = models.Project.objects.filter(user=request.authentication, project_id=pk).first()
+        uproject_obj = models.ProjectUser.objects.filter(user=request.authentication, project_id=pk).first()
         if uproject_obj:
             request.project = uproject_obj.project
             return

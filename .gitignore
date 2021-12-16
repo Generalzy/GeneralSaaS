@@ -18,5 +18,7 @@ script
 
 # tencent
 */tencent/conf.py
+*/ali_pay/settings.py
+*/ali_pay/keys
 
 

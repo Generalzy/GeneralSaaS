@@ -6,6 +6,7 @@ from utils.response import ApiResponse
 from django.shortcuts import render, redirect
 from web import models
 from django.db.models import Count
+from django.views.decorators.csrf import csrf_exempt
 
 
 def dashboard(request, pk):
@@ -35,7 +36,7 @@ def chart(request, pk):
     date_dic = collections.OrderedDict()
     for i in range(30):
         date = time_now - datetime.timedelta(days=i)
-        date_dic[date.strftime('%Y-%m-%d')] = [time.mktime(date.timetuple())*1000, 0] # 单位是毫秒
+        date_dic[date.strftime('%Y-%m-%d')] = [time.mktime(date.timetuple()) * 1000, 0]  # 单位是毫秒
     for query in query_set:
         date_dic[query['ctime']][-1] += query.get('ct', 0)
 
@@ -43,6 +44,41 @@ def chart(request, pk):
     return JsonResponse(res.data)
 
 
+@csrf_exempt
 def statistics(request, pk):
     if request.method == 'GET':
         return render(request, 'statistics.html')
+    elif request.method == 'POST':
+        start = request.POST.get('start')
+        end = request.POST.get('end')
+        b_data = models.Issues.objects.filter(project_id=pk, create_time__gte=start, create_time__lte=end).extra(
+            select={'name': 'priority'}).values(
+            'name').annotate(y=Count('id'))
+        res = ApiResponse()
+        res.BinData = list(b_data)
+        users = [request.project.creator]
+        for item in models.ProjectUser.objects.filter(project_id=pk).all():
+            users.append(item.user)
+        temp = []
+        for user in users:
+            dic = dict().fromkeys(list(range(1, 8)), 0)
+            obj = models.Issues.objects.filter(project_id=pk, assign=user, create_time__gte=start,
+                                               create_time__lte=end).values('status').annotate(
+                data=Count('id'))
+            for item in obj:
+                dic[item['status']] += item['data']
+            temp.append({
+                'name': user.username,
+                'data': list(dic.values())
+            })
+        res.categories = [
+            '新建',
+            '处理中',
+            '已解决',
+            '已忽略',
+            '待反馈',
+            '已关闭',
+            '重新打开',
+        ]
+        res.series = temp
+        return JsonResponse(res.data)

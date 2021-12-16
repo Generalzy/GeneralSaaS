@@ -8,7 +8,7 @@ class UserInfo(models.Model):
     password = models.CharField(verbose_name='密码', max_length=32)
     email = models.EmailField(verbose_name='邮箱', unique=True)
     phone = models.CharField(verbose_name='手机号', unique=True, max_length=11)
-
+    # identity = models.ForeignKey(verbose_name='账户类型', to='PricePolicy', on_delete=models.DO_NOTHING)
     project_num = models.IntegerField(verbose_name='创建的项目数量', default=0)
 
     def __str__(self):

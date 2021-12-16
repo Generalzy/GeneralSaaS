@@ -1,6 +1,187 @@
 {% extends 'bases/manage.html' %}
+{% load static %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'daterangepicker-master/daterangepicker.css' %}">
+{% endblock %}
 
 {% block content %}
-    <h1>统计</h1>
+    <div class="container-fluid">
+        <div>
+            <div class="input-group col-md-3">
+              <span class="input-group-addon" id="basic-addon1">日期范围</span>
+              <input type="text" class="form-control" aria-describedby="basic-addon1" id="datePicker" name="dates">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-7">
+                <div class="panel panel-default">
+                  <div class="panel-heading"><span class="glyphicon glyphicon-search" aria-hidden="true"> 工作进度</span></div>
+                  <div class="panel-body">
+                    <div id="Zhu" style="min-width:400px;height:400px"></div>
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="panel panel-default">
+                  <div class="panel-heading"><span class="glyphicon glyphicon-search" aria-hidden="true"> 优先级统计</span></div>
+                  <div class="panel-body">
+                    <div id="BinTu" style="min-width:400px;height:400px"></div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'daterangepicker-master/moment.min.js' %}"></script>
+    <script src="{% static 'daterangepicker-master/daterangepicker.js' %}"></script>
+    <script src="{% static 'Highcharts-9.3.2/code/highcharts.js' %}"></script>
+
+    <script>
+    $(function (){
+        initDate()
+        init_GetData()
+    })
+
+    let BinConfig={
+		chart: {
+				plotBackgroundColor: null,
+				plotBorderWidth: null,
+				plotShadow: false,
+				type: 'pie'
+		},
+             credits:{
+                enabled:false,
+           },
+		title: {
+				text: null,
+		},
+		tooltip: {
+				pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+		},
+		plotOptions: {
+				pie: {
+						allowPointSelect: true,
+						cursor: 'pointer',
+						dataLabels: {
+								enabled: true,
+								format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+								style: {
+										color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+								}
+						}
+				}
+		},
+		series: [{
+				name: '优先级',
+				colorByPoint: true,
+				data: []
+		}]
+};
+    let ZhuConfig={
+    chart: {
+        type: 'column'
+    },
+             credits:{
+                enabled:false,
+           },
+    title: {
+        text: null,
+    },
+    xAxis: {
+        categories: []
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: null,
+        },
+        stackLabels: {  // 堆叠数据标签
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+        align: 'right',
+        x: -30,
+        verticalAlign: 'top',
+        y: 25,
+        floating: true,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+    },
+    tooltip: {
+        formatter: function () {
+            return '<b>' + this.x + '</b><br/>' +
+                this.series.name + ': ' + this.y + '<br/>' +
+                '总量: ' + this.point.stackTotal;
+        }
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                style: {
+                    // 如果不需要数据标签阴影，可以将 textOutline 设置为 'none'
+                    textOutline: '1px 1px black'
+                }
+            }
+        }
+    },
+    series: []
+};
+
+    function init_GetData()
+    {
+        let start_time=moment().format('YYYY-MM-DD')
+        getData(start_time,start_time)
+    }
+    function getData(start_time,end_time){
+        $.ajax({
+                url:'{% url 'statistics' pk=request.project.id %}',
+                type:'post',
+                dataType:'json',
+                data:{'start':start_time,'end':end_time},
+                success:function (res){
+                    BinConfig.series[0].data=res.BinData
+                    ZhuConfig.series=res.series
+                    ZhuConfig.xAxis.categories=res.categories
+                    Highcharts.chart('BinTu',BinConfig)
+                    Highcharts.chart('Zhu',ZhuConfig)
+                }
+            })
+    }
+
+    function initDate(){
+        var options={
+            maxDate:moment(),
+            alwaysShowCalendars:true,
+            showWeekNumbers:true,
+            ranges:{
+                '今天':[moment(),moment()],
+                '昨天':[moment().subtract(1,'days'),moment()],
+                '最近七天':[moment().subtract(7,'days'),moment()],
+                '最近三十天':[moment().subtract(29,'days'),moment()],
+                '本月':[moment().startOf('month'),moment().endOf('month')]
+            },
+        }
+        $('#datePicker').daterangepicker(options,function (start,end,label)
+        {
+            let start_time=start.format('YYYY-MM-DD')
+            let end_time=end.format('YYYY-MM-DD')
+            getData(start_time,end_time)
+        }
+        );
+    }
+    </script>
 {% endblock %}

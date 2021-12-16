@@ -1,0 +1,56 @@
+{% extends 'bases/base.html' %}
+
+
+
+{% block content %}
+    <h1 class="text-center h1" style="margin-top: 100px">多种方案，使用多种场景</h1>
+    <div class="container" style="margin-top: 100px">
+        <div class="row">
+            {% for price in prices %}
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                  <div class="panel-heading">{{ price.title }}</div>
+                  <div class="panel-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <h2 class="text-center">￥<span>{{ price.price }}</span>/年</h2>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <form action="{% url 'pay' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="text" hidden name="pid" value="{{ price.id }}">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" id="basic-addon1">数量</span>
+                                              <input type="text" class="form-control" placeholder="购买数量" aria-describedby="basic-addon1" value="1" name="count">
+                                                <div class="input-group-btn">
+                                                    <button class="btn btn-success" type="submit">立即购买</button>
+                                              </div>
+                                    </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>最大项目数量:{{ price.project_num }}</td>
+                            </tr>
+                        <tr>
+                            <td>最大项目空间:{{ price.project_space }}</td>
+                        </tr>
+                        <tr>
+                            <td>最大文件支持:{{ price.per_file_size }}</td>
+                        </tr>
+                        <tr>
+                            <td>项目成员:{{ price.project_member }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                  </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
