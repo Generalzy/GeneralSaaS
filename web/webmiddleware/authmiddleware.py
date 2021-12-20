@@ -14,7 +14,7 @@ class AuthMiddleWare(MiddlewareMixin):
 
 class LoginMiddleWare(MiddlewareMixin):
     def process_request(self, request):
-        if request.path_info in settings.WHITE_URL_LIST:
+        if request.path_info in settings.WHITE_URL_LIST or request.path_info.startswith('/admin/'):
             return
         else:
             if not request.authentication:

@@ -11,6 +11,7 @@ GeneralSaaS/settings.py
 local_settings.py
 *.sqlit3
 script
+script/*
 
 # database
 */migrations/*.py

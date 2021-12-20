@@ -1,3 +1,6 @@
 from django.contrib import admin
+from web.models import UserInfo,Project,PricePolicy
 
-# Register your models here.
+admin.site.register(Project)
+admin.site.register(UserInfo)
+admin.site.register(PricePolicy)
