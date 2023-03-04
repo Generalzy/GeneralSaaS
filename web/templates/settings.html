@@ -13,7 +13,48 @@
     <div class="panel panel-warning">
       <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"> 个 人 资 料</span></div>
       <div class="panel-body">
-        <h1>个 人 资 料</h1>
+          <div class="row panel panel-body">
+              <ul class="list-group">
+                  <li class="list-group-item">
+                      <div class="row">
+                          <p class="col-md-6">用户名：</p>
+                          <p class="col-md-6">{{ user.username }}</p>
+                      </div>
+                  </li>
+                  <li class="list-group-item">
+                      <div class="row">
+                          <p class="col-md-6">邮&nbsp;&nbsp;&nbsp;&nbsp;箱：</p>
+                          <p class="col-md-6">{{ user.email }}</p>
+                      </div>
+                  </li>
+                  <li class="list-group-item">
+                      <div class="row">
+                          <p class="col-md-6">手机号：</p>
+                          <p class="col-md-6">{{ user.phone }}</p>
+                      </div>
+                  </li>
+                  <li class="list-group-item">
+                      <div class="row">
+                          <p class="col-md-6">项目数：</p>
+                          <p class="col-md-6">{{ user.project_num }}</p>
+                      </div>
+                  </li>
+                  <li class="list-group-item">
+                      <div class="row">
+                          <p class="col-md-6">项&nbsp;&nbsp;&nbsp;&nbsp;目：</p>
+                          <p class="col-md-6">
+                              {% for p in project %}
+                                  {% if forloop.last %}
+                                      <span>{{ p.name }} .</span>
+                                  {% else %}
+                                      <span>{{ p.name }} ,</span>
+                                  {% endif %}
+                              {% endfor %}
+                          </p>
+                      </div>
+                  </li>
+                </ul>
+          </div>
       </div>
     </div>
 {% endblock %}

@@ -287,3 +287,16 @@ class InviteModelForm(BootStrapForm, forms.ModelForm):
     class Meta:
         model = models.ProjectInvite
         fields = ('period', 'count')
+
+
+class UpdateUserPasswordForm(forms.Form):
+    password = forms.CharField(label='旧密码', min_length=11, max_length=22, error_messages={
+        'min_length': '密码不得低于11位',
+        'max_length': '密码不得高于22位',
+        "required": "密码不得为空"
+    }, widget=forms.PasswordInput(), required=True)
+    new_password = forms.CharField(label='新密码', min_length=11, max_length=22, error_messages={
+        'min_length': '新密码不得低于11位',
+        'max_length': '新密码不得高于22位',
+        "required": "新密码不得为空"
+    }, widget=forms.PasswordInput(), required=True)

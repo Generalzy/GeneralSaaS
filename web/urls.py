@@ -13,7 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+# from django.conf.urls import url
+from django.urls import re_path as url
 from web.views import account
 from web.views import home
 from web.views import project
@@ -53,6 +54,8 @@ urlpatterns = [
     url(r'^settingsDelete/', setting.delete, name='settingsDelete'),
     url(r'^settings/', setting.settings, name='settings'),
     url(r'^settingsPwd/', setting.password, name='settingsPwd'),
+    url(r'^settingsIssue/', setting.issue, name="settingsIssue"),
+    url(r"^settingsModel/", setting.model, name="settingsModel"),
     # wiki
     url(r'^manage/(?P<pk>\d+)/wiki/', wikis.wiki, name='wiki'),
     url(r'^manage/(?P<pk>\d+)/wikiAdd/', wikis.wiki_add, name='wikiAdd'),

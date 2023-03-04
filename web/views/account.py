@@ -9,6 +9,7 @@ from utils.pacture import get_png
 from libs.tencent.sends import send_message
 from uuid import uuid4
 from datetime import datetime
+from threading import Thread
 import random
 
 
@@ -49,9 +50,13 @@ def sms(request):
         form = SmsForm(data=request.POST)
         phone = request.POST.get('phone')
         if form.is_valid():
-            sms_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-            send_message(phone, sms_code)
-            cache.set(f'{settings.PHONE_CACHE_KEY}{phone}', sms_code, 60)
+            def task():
+                sms_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+                send_message(phone, sms_code)
+                cache.set(f'{settings.PHONE_CACHE_KEY}{phone}', sms_code, 60)
+
+            tmp = Thread(target=task)
+            tmp.start()
             return JsonResponse(res.data)
         else:
             res.msg = form.errors

@@ -1,6 +1,3 @@
-import json
-
-import ujson
 from django.shortcuts import HttpResponse, render, redirect
 from django.http import JsonResponse
 from libs.ali_pay import get_alipay_url, check_pay

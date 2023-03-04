@@ -51,26 +51,36 @@ def statistics(request, pk):
     elif request.method == 'POST':
         start = request.POST.get('start')
         end = request.POST.get('end')
+
+        # 查询issue
+        # 1. 将priority映射为name
+        # 2. 按照id分组聚合求count
+        # 3. 导入name和y
         b_data = models.Issues.objects.filter(project_id=pk, create_time__gte=start, create_time__lte=end).extra(
-            select={'name': 'priority'}).values(
-            'name').annotate(y=Count('id'))
+            select={'name': 'priority'}
+        ).values('name').annotate(y=Count('id'))
+
         res = ApiResponse()
         res.BinData = list(b_data)
+
         users = [request.project.creator]
         for item in models.ProjectUser.objects.filter(project_id=pk).all():
             users.append(item.user)
+
         temp = []
         for user in users:
             dic = dict().fromkeys(list(range(1, 8)), 0)
             obj = models.Issues.objects.filter(project_id=pk, assign=user, create_time__gte=start,
                                                create_time__lte=end).values('status').annotate(
                 data=Count('id'))
+
             for item in obj:
                 dic[item['status']] += item['data']
             temp.append({
                 'name': user.username,
                 'data': list(dic.values())
             })
+
         res.categories = [
             '新建',
             '处理中',

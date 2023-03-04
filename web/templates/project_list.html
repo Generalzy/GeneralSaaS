@@ -3,6 +3,7 @@
 {% block css %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <style>
     .project{
         margin-top: 10px;
@@ -177,17 +178,17 @@
 
 {% block js %}
     <script src="{% static 'js/sweetalert.min.js' %}"></script>
+    <script src="{% static 'js/jQuery3.6.0.js' %}"></script>
     <script>
         let $btnSubmit=$('#btn-submit')
         $btnSubmit.click(function (){
-
-            swal({
-              title: "是否创建此项目？",
-                text:'项目创建无法更改或删除！',
-              type: "info",
-              showCancelButton: true,
-              closeOnConfirm: false,
-              showLoaderOnConfirm: true
+            sweetAlert({
+                  title: "是否创建此项目？",
+                  text:'项目创建无法更改或删除！',
+                  type: "info",
+                  showCancelButton: true,
+                  closeOnConfirm: false,
+                  showLoaderOnConfirm: true
             }, function () {
               $.ajax({
                 url:'',

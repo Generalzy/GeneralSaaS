@@ -164,14 +164,14 @@
 
     function initDate(){
         var options={
-            maxDate:moment(),
+            maxDate:moment().add(1,"days"),
             alwaysShowCalendars:true,
             showWeekNumbers:true,
             ranges:{
-                '今天':[moment(),moment()],
-                '昨天':[moment().subtract(1,'days'),moment()],
-                '最近七天':[moment().subtract(7,'days'),moment()],
-                '最近三十天':[moment().subtract(29,'days'),moment()],
+                '今天':[moment(),moment().add(1, 'days')],
+                '昨天':[moment().subtract(1,'days'),moment().add(1, 'days')],
+                '最近七天':[moment().subtract(7,'days'),moment().add(1, 'days')],
+                '最近三十天':[moment().subtract(29,'days'),moment().add(1, 'days')],
                 '本月':[moment().startOf('month'),moment().endOf('month')]
             },
         }
