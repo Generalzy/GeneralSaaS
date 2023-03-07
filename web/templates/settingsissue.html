@@ -1,8 +1,9 @@
 {% extends 'bases/conf.html' %}
 {% load static %}
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
     <style>
         .settingIssue{
             border-left: 5px solid #ffd900 !important;
@@ -46,6 +47,7 @@
 
 {% block js %}
     <script src="{% static 'js/jQuery3.6.0.js' %}"></script>
+
     <script src="{% static 'js/sweetalert.min.js' %}"></script>
     <script>
         $("#submit").click(function (e) {
