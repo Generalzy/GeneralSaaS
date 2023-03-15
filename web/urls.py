@@ -77,5 +77,7 @@ urlpatterns = [
     url('^order/', order.order, name='order'),
     url('^result/', order.pay_result, name='result'),
 
+    # 首页
+    url('^helper/',home.helper,name="helper"),
     url(r'^', home.index, name='index'),
 ]

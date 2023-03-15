@@ -181,36 +181,60 @@
     <script src="{% static 'js/sweetalert.min.js' %}"></script>
     <script>
         let $btnSubmit=$('#btn-submit')
+
+        function sendAddRequest() {
+                      $.ajax({
+                        url:'',
+                        type:'post',
+                        data:$('#addForm').serialize(),
+                        dataType:'json',
+                        success:function (res){
+                            if (!res.code)
+                            {
+                               $.each(res.errors,function (index,obj)
+                                {
+                                    let targetId='#id_'+index;
+                                    $(targetId).next().text(obj[0]).parent().addClass('has-error')
+                                })
+                            }
+                            else
+                            {
+                                location.reload();
+                            }
+                        }
+                    })
+                }
+
+
         $btnSubmit.click(function (){
-            sweetAlert({
+            try {
+                sweetAlert({
                   title: "是否创建此项目？",
                   text:'项目创建无法更改或删除！',
                   type: "info",
+                  buttons: true,
+                  dangerMode: true,
                   showCancelButton: true,
                   closeOnConfirm: false,
                   showLoaderOnConfirm: true
-            }, function () {
-              $.ajax({
-                url:'',
-                type:'post',
-                data:$('#addForm').serialize(),
-                dataType:'json',
-                success:function (res){
-                    if (!res.code)
-                    {
-                       $.each(res.errors,function (index,obj)
-                        {
-                            let targetId='#id_'+index;
-                            $(targetId).next().text(obj[0]).parent().addClass('has-error')
-                        })
-                    }
-                    else
-                    {
-                        location.reload();
-                    }
-                }
-            })
-            });
+                }).then((ok)=>{
+                        if (ok){
+                            sendAddRequest()
+                        }
+                    },
+                );
+            }catch (e) {
+                sweetAlert({
+                  title: "是否创建此项目？",
+                  text:'项目创建无法更改或删除！',
+                  type: "info",
+                  buttons: true,
+                  dangerMode: true,
+                  showCancelButton: true,
+                  closeOnConfirm: false,
+                  showLoaderOnConfirm: true
+                },sendAddRequest)
+            }
         })
 
     </script>

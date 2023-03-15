@@ -1,0 +1,249 @@
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block tilte %}帮助文档{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-primary">
+            <div class="panel-heading bg-info" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  注册登录
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                  <h4>本平台限制未登录用户的使用,请尽快登录获取良好的用户体验!</h4>
+                  以下为具体步骤：<br><br>
+                  <!-- List group -->
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                        <div>
+                            <p>第一步：注册</p>
+                            <p>
+                                <span>点击注册按钮,跳转至注册页面,并填写账号,密码,手机号等信息进行注册:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/register.png" %}" alt="注册" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <p>第二步：登录</p>
+                            <p>
+                                <span>点击登录按钮,跳转至登录页面,填写账号,手机号进行短信登录:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/smslogin.png" %}" alt="短信登录" class="img-thumbnail">
+                            </p>
+                            <p>
+                                <span>或者也可以选择用户名密码登录:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/login.png" %}" alt="密码登录" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-success">
+            <div class="panel-heading" role="tab" id="headingTwo">
+              <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  项目管理
+                </a>
+              </h4>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+              <div class="panel-body">
+                  <h4>本平台提供项目基本的增上改查功能以及项目wiki,项目文件,项目统计看板!</h4>
+                  以下为具体步骤：<br><br>
+                  <!-- List group -->
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                        <div>
+                            <p>第一步：创建项目</p>
+                            <p>
+                                <span>点击新建项目按钮,跳转至注册页面,并填写项目名等信息进行新建:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/project_create.png" %}" alt="新建项目" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <p>第二步：项目wiki</p>
+                            <p>
+                                <span>点击wiki按钮,跳转至wiki页面进行wiki的编辑:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/create_wiki.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第三步：项目文件</p>
+                            <p>
+                                <span>点击文件按钮,跳转至文件页面进行文件及目录的上传及新建:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/file_upload.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第四步：项目概览</p>
+                            <p>
+                                <span>点击概览按钮,跳转至概览页面以获取项目基本信息:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/dashboard.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-info">
+            <div class="panel-heading" role="tab" id="headingThree">
+              <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  问题管理
+                </a>
+              </h4>
+            </div>
+            <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+              <div class="panel-body">
+                  <h4>本平台的核心功能issue管理!</h4>
+                  以下为具体步骤：<br><br>
+                  <!-- List group -->
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                        <div>
+                            <p>第一步：issue</p>
+                            <p>
+                                <span>点击新建问题按钮,并填写bug优先级等信息进行新建:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/issue_create_function.png" %}" alt="新建issue" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <p>第二步：修复bug</p>
+                            <p>
+                                <span>点击issue,跳转至issue页面进行编辑:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/fix.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第三步：issue看板</p>
+                            <p>
+                                <span>点击统计按钮,查看问题统计:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/statistic.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第四步：共同开发</p>
+                            <p>
+                                <span>点击邀请按钮,生成邀请码:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/invite.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-warning">
+            <div class="panel-heading" role="tab" id="headingFour">
+              <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                  信息维护
+                </a>
+              </h4>
+            </div>
+            <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+              <div class="panel-body">
+                  <h4>本平台提供基本信息维护接口!</h4>
+                  以下为具体步骤：<br><br>
+                  <!-- List group -->
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                        <div>
+                            <p>第一步：个人资料</p>
+                            <p>
+                                <span>点击我的资料按钮,查看个人资料:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/mine.png" %}" alt="新建项目" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <p>第二步：修改密码</p>
+                            <p>
+                                <span>点击修改密码按钮,进行密码修改:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/update_password.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第三步：删除项目</p>
+                            <p>
+                                <span>点击删除项目按钮,进项项目删除:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/delete_project.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                      <li class="list-group-item">
+                        <div>
+                            <p>第四步：问题类型/模块管理</p>
+                            <p>
+                                <span>点击问题类型/模块管理按钮,进项issue管理:</span>
+                            </p>
+                            <p>
+                                <img src="{% static "img/issue_create.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                            <p>
+                                <img src="{% static "img/issue_model.png" %}" alt="wiki" class="img-thumbnail">
+                            </p>
+                        </div>
+                    </li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}

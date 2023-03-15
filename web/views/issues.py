@@ -82,10 +82,14 @@ def record_issue(request, pk, issue_id):
     elif request.method == 'POST':
         res = ApiResponse()
         parent = request.POST.get('parent', None)
-        content = request.POST.get('val')
-        models.IssuesReply.objects.create(reply_type=2, reply_id=parent, content=content,
-                                          creator=request.authentication, issues_id=issue_id)
-        return JsonResponse(res.data)
+        content = request.POST.get('val', "")
+        if content != "":
+            models.IssuesReply.objects.create(reply_type=2, reply_id=parent, content=content,
+                                              creator=request.authentication, issues_id=issue_id)
+            return JsonResponse(res.data)
+        else:
+            res.code = 0
+            return JsonResponse(res.data)
 
 
 def code(request, pk):
