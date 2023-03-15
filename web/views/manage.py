@@ -21,7 +21,15 @@ def dashboard(request, pk):
         for pu_obj in models.ProjectUser.objects.filter(project_id=pk).all():
             users.append(pu_obj.user.username)
         top_ten = models.Issues.objects.filter(project_id=pk, assign__isnull=False).order_by('-create_time')[:5]
-        return render(request, 'dashboard.html', {'status_dic': status_dic, 'users': users, 'top_ten': top_ten})
+
+        # 任务提醒
+        issue_count = models.Issues.objects.filter(project_id=pk, assign=request.authentication, status__in=(
+            1, 2, 5, 7
+        )).count()
+
+        return render(request, 'dashboard.html', {
+            'status_dic': status_dic, 'users': users, 'top_ten': top_ten, "issue_count": issue_count,
+        })
 
 
 def chart(request, pk):

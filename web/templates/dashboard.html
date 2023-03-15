@@ -19,6 +19,8 @@
     </style>
 {% endblock %}
 
+{% block issue_count %}{{ issue_count }}{% endblock %}
+
 {% block content %}
     <div class="container-fluid">
         <div class="col-md-8">
@@ -173,5 +175,22 @@
             }
         })
    }
+
+
+    let issueCountEle = $("#issue_count")
+    issueCountEle.click(function (e){
+        e.preventDefault()
+        e.stopPropagation()
+        let issueCount = issueCountEle.text()
+        if (issueCount==="0" || issueCount===0){
+            swal({
+                  title: "暂无issue需要解决!",
+                  text: "",
+                })
+        }else{
+            let msg = "当前项目有"+issueCount+"个issue待您解决!"
+            swal({"title":msg,"type":"warning","text":""})
+        }
+    })
     </script>
 {% endblock %}
