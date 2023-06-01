@@ -17,9 +17,17 @@ def dashboard(request, pk):
             status_dic[key] = {'text': val, 'count': 0}
         for item in issues_data:
             status_dic[item['status']]['count'] += item['ct']
+
         users = [request.authentication.username]
         for pu_obj in models.ProjectUser.objects.filter(project_id=pk).all():
             users.append(pu_obj.user.username)
+        # 获取当前项目
+        project_own = request.project.creator.pk
+        if project_own != request.authentication.pk:
+            # 如果当前用户是参与者
+            users.append(request.project.creator.username)
+        # users需要去重
+        users = list(set(users))
         top_ten = models.Issues.objects.filter(project_id=pk, assign__isnull=False).order_by('-create_time')[:5]
 
         # 任务提醒

@@ -11,7 +11,7 @@ from threading import Thread
 def settings(request):
     if request.method == 'GET':
         user = request.authentication
-        project = models.Project.objects.filter(creator=user)
+        project = models.Project.objects.filter(creator=user).all()
         return render(request, 'settings.html', locals(), status=200)
 
 
@@ -21,7 +21,8 @@ def delete(request):
     elif request.method == 'POST':
         res = ApiResponse()
         project_name = request.POST.get('pname')
-        project = models.Project.objects.filter(creator=request.authentication, name=project_name).first()
+        user = request.authentication
+        project = models.Project.objects.filter(creator=user, name=project_name).first()
         if not project:
             res.code = 0
             res.msg = '请填写正确的项目名'
@@ -34,6 +35,9 @@ def delete(request):
             # delete_bucket(bucket=project.bucket)
             t.start()
             project.delete()
+            # user的项目减一
+            user.project_num = user.project_num-1
+            user.save()
             return redirect('project_list')
 
 
